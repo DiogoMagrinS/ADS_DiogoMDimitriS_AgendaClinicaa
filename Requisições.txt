@@ -1,0 +1,75 @@
+✅ 1. Autenticação (/api/auth)
+Método              Rota	                                            Descrição	                    Body / Parâmetros
+
+POST	http://localhost:3000/api/auth/login	                        Autenticação via JWT	        { email, senha }
+
+✅ 2. Usuários (/api/usuarios)
+
+Método	                    Rota	                                            Descrição
+
+GET	     http://localhost:3000/api/usuarios	                           Listar todos os usuários
+
+GET	     http://localhost:3000/api/usuarios/:id	                       Buscar usuário por ID
+
+POST	 http://localhost:3000/api/usuarios	                           Criar novo usuário
+
+PUT	     http://localhost:3000/api/usuarios/:id	                       Atualizar dados do usuário
+
+PUT	     http://localhost:3000/api/usuarios/:id/senha	               Alterar a senha do usuário
+
+DELETE	 http://localhost:3000/api/usuarios/:id	                       Remover (soft delete) usuário
+
+✅ 3. Especialidades (/api/especialidades)
+
+Método	                    Rota	                                            Descrição
+
+GET	       http://localhost:3000/api/especialidades	                    Listar todas as especialidades
+
+GET	       http://localhost:3000/api/especialidades/:id	                Buscar especialidade por ID
+
+POST	   http://localhost:3000/api/especialidades	                    Criar nova especialidade
+
+PUT	       http://localhost:3000/api/especialidades/:id	                Atualizar especialidade
+
+DELETE	   http://localhost:3000/api/especialidades/:id	                Deletar especialidade
+
+✅ 4. Profissionais (/api/profissionais)
+Método	                     Rota	                                              Descrição
+
+GET	        http://localhost:3000/api/profissionais	                    Listar todos os profissionais
+
+GET	        http://localhost:3000/api/profissionais/:id	                Buscar profissional por ID
+
+POST	    http://localhost:3000/api/profissionais	                    Criar profissional
+
+PUT	        http://localhost:3000/api/profissionais/:id	                Atualizar dados do profissional
+
+DELETE	    http://localhost:3000/api/profissionais/:id	                Deletar profissional
+
+GET	        http://localhost:3000/api/profissionais/:id/agenda	        Ver agenda (disponibilidade) do profissional
+
+✅ 5. Agendamentos (/api/agendamentos)
+
+🔐 Todas as rotas abaixo exigem autenticação com JWT
+
+Método	                    Rota	                                            Descrição
+
+GET	        http://localhost:3000/api/agendamentos	                    Listar todos os agendamentos
+
+GET	        http://localhost:3000/api/agendamentos/:id	                Buscar agendamento por ID
+
+GET	        http://localhost:3000/api/agendamentos/me	                Listar agendamentos do paciente logado
+
+POST	    http://localhost:3000/api/agendamentos	                    Criar novo agendamento
+
+PUT	        http://localhost:3000/api/agendamentos/:id	                Atualizar dados do agendamento (data, status)
+
+PUT	        http://localhost:3000/api/agendamentos/:id/observacoes	    Editar observações internas do agendamento
+
+DELETE	    /http://localhost:3000api/agendamentos/:id	                Cancelar ou excluir agendamento
+
+⚙️ 6. Utilitários
+
+Método	            Rota	                                                    Descrição
+
+GET	        http://localhost:3000/healthcheck	                        Verifica se o servidor está online

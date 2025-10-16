@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  email     String    @unique
+  senha     String
+  tipo      TipoUsuario
+  criadoEm  DateTime  @default(now())
+  profissional Profissional?
+  agendamentos Agendamento[] @relation("PacienteAgendamentos")
+}
+
+model Profissional {
+  id               Int           @id @default(autoincrement())
+  usuario          Usuario       @relation(fields: [usuarioId], references: [id])
+  usuarioId        Int           @unique
+  especialidade    Especialidade @relation(fields: [especialidadeId], references: [id])
+  especialidadeId  Int
+  diasAtendimento DiaSemana[]
+  horaInicio       String
+  horaFim          String
+  biografia        String?       
+  formacao         String?       
+  fotoPerfil       String? 
+  agendamentos     Agendamento[] @relation("ProfissionalAgendamentos")
+}
+
+
+model Agendamento {
+  id            Int         @id @default(autoincrement())
+  paciente      Usuario     @relation("PacienteAgendamentos", fields: [pacienteId], references: [id])
+  pacienteId    Int
+  profissional  Profissional @relation("ProfissionalAgendamentos", fields: [profissionalId], references: [id])
+  profissionalId Int
+  data          DateTime
+  status        StatusAgendamento @default(AGENDADO)
+  criadoEm      DateTime    @default(now())
+  observacoes    String? 
+  historicoStatus HistoricoStatus[]
+}
+
+model HistoricoStatus {
+  id             Int                @id @default(autoincrement())
+  agendamentoId  Int
+  agendamento    Agendamento        @relation(fields: [agendamentoId], references: [id])
+  status         StatusAgendamento
+  dataHora       DateTime           @default(now())
+}
+
+
+model Especialidade {
+  id   Int     @id @default(autoincrement())
+  nome String  @unique
+  profissionais Profissional[]
+}
+
+
+enum TipoUsuario {
+  PACIENTE
+  PROFISSIONAL
+  RECEPCIONISTA
+}
+
+enum StatusAgendamento {
+  AGENDADO
+  CONFIRMADO
+  CANCELADO
+}
+
+enum DiaSemana {
+  SEGUNDA
+  TERCA
+  QUARTA
+  QUINTA
+  SEXTA
+  SABADO
+  DOMINGO
+}
