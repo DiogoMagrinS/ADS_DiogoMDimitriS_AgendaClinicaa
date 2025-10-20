@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 cat > .gitignore <<EOF
 # Node
 node_modules/
@@ -10,3 +11,11 @@ Thumbs.db
 .vscode/
 .idea/
 EOF
+=======
+node_modules/
+.env
+dist/
+.DS_Store
+.vscode/
+>>>>>>> 860c326 (Commit 20/11 Adicionado Recepcionista)
+

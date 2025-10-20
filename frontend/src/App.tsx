@@ -7,6 +7,8 @@ import Dashboard from './pages/Dashboard';
 import MeusAgendamentos from './pages/paciente/MeusAgendamentos';
 import NovoAgendamento from './pages/paciente/NovoAgendamento';
 import AgendaProfissional from './pages/profissional/Agenda';
+import DashboardRecepcionista from "./pages/recepcionista/DashboardRecepcionista";
+import { ToastContainer } from "react-toastify";
 
 export default function App() {
   return (
@@ -16,7 +18,15 @@ export default function App() {
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
           <Route
-            path="/dashboard"
+            path="/dashboard/profissional"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/dashboard/paciente"
             element={
               <PrivateRoute>
                 <Dashboard />
@@ -46,7 +56,9 @@ export default function App() {
               </PrivateRoute>
             }
           />
+          <Route path="/dashboard/recepcionista" element={<DashboardRecepcionista />} />
         </Routes>
+        <ToastContainer position="top-right" autoClose={3000} />
       </BrowserRouter>
     </AuthProvider>
   );
