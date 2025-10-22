@@ -7,7 +7,11 @@ import {
   deletarUsuario,
   listarAgendamentos,
   atualizarAgendamento,
+  listarEspecialidades,
+  criarEspecialidade,
+  excluirEspecialidade,
 } from "../controllers/recepcionistaController";
+
 
 const router = Router();
 
@@ -23,4 +27,8 @@ router.delete("/usuarios/:id", deletarUsuario);
 router.get("/agendamentos", listarAgendamentos);
 router.put("/agendamentos/:id", atualizarAgendamento);
 
+// ======= Rotas de especialidades =======
+router.get("/especialidades", listarEspecialidades);
+router.post("/especialidades", criarEspecialidade);
+router.delete("/especialidades/:id", excluirEspecialidade);
 export default router;

@@ -73,3 +73,4 @@ DELETE	    /http://localhost:3000api/agendamentos/:id	                Cancelar o
 Método	            Rota	                                                    Descrição
 
 GET	        http://localhost:3000/healthcheck	                        Verifica se o servidor está online
+

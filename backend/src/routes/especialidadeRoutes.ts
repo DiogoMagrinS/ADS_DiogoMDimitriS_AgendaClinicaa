@@ -1,21 +1,14 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
-  getEspecialidades,
-  getEspecialidadePorId,
-  postEspecialidade,
-  putEspecialidade,
-  deleteEspecialidade
-} from '../controllers/especialidadeController';
-import { autenticarToken } from '../middlewares/authMiddleware';
+  listarEspecialidades,
+  criarEspecialidade,
+  excluirEspecialidade,
+} from "../controllers/especialidadeController";
 
 const router = Router();
 
-router.use(autenticarToken); // protege todas as rotas
-
-router.get('/', getEspecialidades);
-router.get('/:id', getEspecialidadePorId);
-router.post('/', postEspecialidade);
-router.put('/:id', putEspecialidade);
-router.delete('/:id', deleteEspecialidade);
+router.get("/", listarEspecialidades);
+router.post("/", criarEspecialidade);
+router.delete("/:id", excluirEspecialidade);
 
 export default router;
