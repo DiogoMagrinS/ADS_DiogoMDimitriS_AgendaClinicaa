@@ -4,10 +4,9 @@ import { AuthProvider } from './contexts/AuthProvider';
 import PrivateRoute from './routes/PrivateRoute';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import MeusAgendamentos from './pages/paciente/MeusAgendamentos';
-import NovoAgendamento from './pages/paciente/NovoAgendamento';
 import AgendaProfissional from './pages/profissional/Agenda';
 import DashboardRecepcionista from "./pages/recepcionista/DashboardRecepcionista";
+import DashboardPaciente from "./pages/paciente/DashboardPaciente"; // ✅ import novo
 import { ToastContainer } from "react-toastify";
 
 export default function App() {
@@ -15,8 +14,14 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+
+          {/* Rota padrão */}
           <Route path="/" element={<Navigate to="/login" />} />
+
+          {/* Login */}
           <Route path="/login" element={<Login />} />
+
+          {/* Dashboard do PROFISSIONAL */}
           <Route
             path="/dashboard/profissional"
             element={
@@ -25,30 +30,29 @@ export default function App() {
               </PrivateRoute>
             }
           />
+
+          {/* Dashboard do PACIENTE (substitui MeusAgendamentos e NovoAgendamento) */}
           <Route
             path="/dashboard/paciente"
             element={
               <PrivateRoute>
-                <Dashboard />
+                <DashboardPaciente />
               </PrivateRoute>
             }
           />
+
+          {/* Dashboard do RECEPCIONISTA */}
           <Route
-            path="/paciente/agendamentos"
+            path="/dashboard/recepcionista"
             element={
               <PrivateRoute>
-                <MeusAgendamentos />
+                <DashboardRecepcionista />
               </PrivateRoute>
             }
           />
+
+          {/* Agenda do PROFISSIONAL */}
           <Route
-          path="/paciente/novo-agendamento"
-          element={
-            <PrivateRoute>
-              <NovoAgendamento />
-            </PrivateRoute>
-          }
-/>        <Route
             path="/profissional/agenda"
             element={
               <PrivateRoute>
@@ -56,8 +60,8 @@ export default function App() {
               </PrivateRoute>
             }
           />
-          <Route path="/dashboard/recepcionista" element={<DashboardRecepcionista />} />
         </Routes>
+
         <ToastContainer position="top-right" autoClose={3000} />
       </BrowserRouter>
     </AuthProvider>

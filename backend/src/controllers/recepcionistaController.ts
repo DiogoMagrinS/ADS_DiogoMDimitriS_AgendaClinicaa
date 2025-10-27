@@ -7,26 +7,6 @@ import bcrypt from "bcryptjs";
 // ====================
 
 // Listar todos os usuários (pacientes, profissionais e recepcionistas)
-export const listarUsuarios = async (req: Request, res: Response) => {
-  try {
-    const usuarios = await prisma.usuario.findMany({
-      include: {
-        profissional: {
-          include: {
-            especialidade: true, // 👈 garante que venha o nome da especialidade
-          },
-        },
-      },
-      orderBy: { id: "asc" },
-    });
-
-    res.json(usuarios);
-  } catch (error) {
-    console.error("Erro ao listar usuários:", error);
-    res.status(500).json({ error: "Erro ao listar usuários." });
-  }
-};
-
 export const criarUsuario = async (req: Request, res: Response) => {
   try {
     const {
@@ -43,40 +23,53 @@ export const criarUsuario = async (req: Request, res: Response) => {
       fotoPerfil,
     } = req.body;
 
+    // validações básicas
+    if (!nome || !email || !senha || !tipo) {
+      return res.status(400).json({ erro: "Campos obrigatórios faltando." });
+    }
+
+    // criptografa a senha
     const senhaHash = await bcrypt.hash(senha, 10);
 
+    // cria o usuário principal
     const novoUsuario = await prisma.usuario.create({
       data: {
         nome,
         email,
         senha: senhaHash,
         tipo,
-        profissional:
-          tipo === "PROFISSIONAL"
-            ? {
-                create: {
-                  especialidadeId: Number(especialidadeId),
-                  diasAtendimento,
-                  horaInicio,
-                  horaFim,
-                  formacao,
-                  biografia,
-                  fotoPerfil,
-                },
-              }
-            : undefined,
-      },
-      include: {
-        profissional: {
-          include: { especialidade: true },
-        },
       },
     });
 
-    res.status(201).json(novoUsuario);
+    // guarda o id para associar ao profissional, se necessário
+    const usuarioId = novoUsuario.id;
+
+    // se for profissional, cria também o registro na tabela Profissional
+    if (tipo === "PROFISSIONAL") {
+      if (!especialidadeId || !horaInicio || !horaFim || !diasAtendimento?.length) {
+        return res
+          .status(400)
+          .json({ erro: "Profissional requer especialidade, horário e dias de atendimento." });
+      }
+
+      await prisma.profissional.create({
+        data: {
+          usuarioId,
+          especialidadeId: Number(especialidadeId),
+          diasAtendimento,
+          horaInicio,
+          horaFim,
+          formacao,
+          biografia,
+          fotoPerfil,
+        },
+      });
+    }
+
+    return res.status(201).json({ mensagem: "Usuário criado com sucesso!" });
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
-    res.status(500).json({ error: "Erro ao criar usuário." });
+    return res.status(500).json({ erro: "Erro interno ao criar usuário." });
   }
 };
 // Atualizar usuário
@@ -202,5 +195,25 @@ export const excluirEspecialidade = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Erro ao excluir especialidade" });
+  }
+};
+
+export const listarUsuarios = async (req: Request, res: Response) => {
+  try {
+    const usuarios = await prisma.usuario.findMany({
+      include: {
+        profissional: {
+          include: {
+            especialidade: true,
+          },
+        },
+      },
+      orderBy: { id: "asc" },
+    });
+
+    return res.json(usuarios);
+  } catch (error) {
+    console.error("Erro ao listar usuários:", error);
+    return res.status(500).json({ erro: "Erro interno ao listar usuários." });
   }
 };
