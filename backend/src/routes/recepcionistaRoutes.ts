@@ -10,6 +10,7 @@ import {
   listarEspecialidades,
   criarEspecialidade,
   excluirEspecialidade,
+  dashboardResumo
 } from "../controllers/recepcionistaController";
 
 
@@ -18,6 +19,7 @@ const router = Router();
 router.use(autenticarToken); // todas as rotas protegidas por JWT
 
 // Usuários
+router.get("/dashboard-resumo", dashboardResumo);
 router.get("/usuarios", listarUsuarios);
 router.post("/usuarios", criarUsuario);
 router.put("/usuarios/:id", atualizarUsuario);

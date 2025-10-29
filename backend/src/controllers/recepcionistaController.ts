@@ -217,3 +217,33 @@ export const listarUsuarios = async (req: Request, res: Response) => {
     return res.status(500).json({ erro: "Erro interno ao listar usuários." });
   }
 };
+export const dashboardResumo = async (req: Request, res: Response) => {
+  try {
+    const [totalUsuarios, totalPacientes, totalProfissionais, totalAgendamentosHoje, canceladosMes] = await Promise.all([
+      prisma.usuario.count(),
+      prisma.usuario.count({ where: { tipo: "PACIENTE" } }),
+      prisma.usuario.count({ where: { tipo: "PROFISSIONAL" } }),
+      prisma.agendamento.count({
+        where: {
+          data: {
+            gte: new Date(new Date().setHours(0, 0, 0, 0)),
+            lte: new Date(new Date().setHours(23, 59, 59, 999)),
+          },
+        },
+      }),
+      prisma.agendamento.count({
+        where: {
+          status: "CANCELADO",
+          data: {
+            gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+          },
+        },
+      }),
+    ]);
+
+    res.json({ totalUsuarios, totalPacientes, totalProfissionais, totalAgendamentosHoje, canceladosMes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ erro: "Erro ao carregar resumo" });
+  }
+};
