@@ -1,274 +1,226 @@
-// src/pages/recepcionista/components/UsuariosManager.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { UserPlus, Info, Edit, Trash2 } from "lucide-react";
 import api from "../../../services/api";
 import { toast } from "react-toastify";
+
+// =====================
+// Tipagens
+// =====================
+interface Usuario {
+  id: number;
+  nome: string;
+  email: string;
+  tipo: "PACIENTE" | "PROFISSIONAL" | "RECEPCIONISTA";
+}
 
 interface Especialidade {
   id: number;
   nome: string;
 }
 
-interface Usuario {
-  id: number;
-  nome: string;
-  email: string;
-  tipo: "PACIENTE" | "PROFISSIONAL" | "RECEPCIONISTA";
-  criadoEm: string;
-  profissional?: {
-    especialidade?: { nome: string };
-  };
-}
-
-export default function UsuariosManager() {
+export default function UsuarioManager() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [especialidades, setEspecialidades] = useState<Especialidade[]>([]);
-  const [filtro, setFiltro] = useState("");
-  const [loading, setLoading] = useState(false);
   const [novoUsuario, setNovoUsuario] = useState({
     nome: "",
     email: "",
     senha: "",
     tipo: "PACIENTE",
     especialidadeId: "",
-    horaInicio: "",
-    horaFim: "",
-    formacao: "",
-    biografia: "",
   });
+  const [detalhes, setDetalhes] = useState<Usuario | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  async function carregarUsuarios() {
+  // =====================
+  // Carregar usuários e especialidades
+  // =====================
+  const carregarUsuarios = async () => {
     try {
       const res = await api.get("/recepcionista/usuarios");
       setUsuarios(res.data);
-    } catch {
+    } catch (error) {
+      console.error(error);
       toast.error("Erro ao carregar usuários");
     }
-  }
+  };
 
-  async function carregarEspecialidades() {
+  const carregarEspecialidades = async () => {
     try {
-      const res = await api.get("/recepcionista/especialidades");
+      const res = await api.get("/especialidades");
       setEspecialidades(res.data);
-    } catch {
-      toast.error("Erro ao carregar especialidades");
+    } catch (error) {
+      console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
     carregarUsuarios();
     carregarEspecialidades();
   }, []);
 
-  async function handleCadastrar(e: React.FormEvent) {
-    e.preventDefault();
+  // =====================
+  // Funções de CRUD
+  // =====================
+  const handleCadastrar = async () => {
+    if (!novoUsuario.nome || !novoUsuario.email || !novoUsuario.senha) {
+      toast.warning("Preencha todos os campos obrigatórios!");
+      return;
+    }
+
     setLoading(true);
     try {
       await api.post("/recepcionista/usuarios", novoUsuario);
       toast.success("Usuário cadastrado com sucesso!");
-      setNovoUsuario({
-        nome: "",
-        email: "",
-        senha: "",
-        tipo: "PACIENTE",
-        especialidadeId: "",
-        horaInicio: "",
-        horaFim: "",
-        formacao: "",
-        biografia: "",
-      });
-      await carregarUsuarios();
-    } catch {
-      toast.error("Erro ao cadastrar usuário");
+      setNovoUsuario({ nome: "", email: "", senha: "", tipo: "PACIENTE", especialidadeId: "" });
+      carregarUsuarios();
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao cadastrar usuário.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  async function handleExcluir(id: number) {
-    if (!confirm("Deseja realmente excluir este usuário?")) return;
+  const handleExcluir = async (id: number) => {
+    if (!confirm("Tem certeza que deseja excluir este usuário?")) return;
+
     try {
       await api.delete(`/recepcionista/usuarios/${id}`);
-      toast.success("Usuário excluído com sucesso");
-      await carregarUsuarios();
-    } catch {
-      toast.error("Erro ao excluir usuário");
+      toast.success("Usuário excluído!");
+      carregarUsuarios();
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao excluir usuário.");
     }
-  }
+  };
 
-  const usuariosFiltrados = usuarios.filter((u) =>
-    u.nome.toLowerCase().includes(filtro.toLowerCase())
-  );
-
+  // =====================
+  // Renderização
+  // =====================
   return (
-    <div className="space-y-6">
-      {/* Formulário de Cadastro */}
-      <form
-        onSubmit={handleCadastrar}
-        className="bg-white shadow rounded-xl p-5 space-y-4"
-      >
-        <h2 className="text-lg font-semibold">Cadastrar Usuário</h2>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Gerenciamento de Usuários</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {/* Formulário de cadastro */}
+      <motion.div
+        className="bg-white rounded-xl shadow p-6 mb-8 border border-gray-100"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <UserPlus className="w-5 h-5 text-blue-500" /> Cadastrar novo usuário
+        </h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <input
             type="text"
-            placeholder="Nome completo"
+            placeholder="Nome"
             value={novoUsuario.nome}
-            onChange={(e) =>
-              setNovoUsuario({ ...novoUsuario, nome: e.target.value })
-            }
-            className="border border-gray-300 rounded-lg px-3 py-2"
-            required
+            onChange={(e) => setNovoUsuario({ ...novoUsuario, nome: e.target.value })}
+            className="border rounded-lg p-2 w-full"
           />
-
           <input
             type="email"
             placeholder="E-mail"
             value={novoUsuario.email}
-            onChange={(e) =>
-              setNovoUsuario({ ...novoUsuario, email: e.target.value })
-            }
-            className="border border-gray-300 rounded-lg px-3 py-2"
-            required
+            onChange={(e) => setNovoUsuario({ ...novoUsuario, email: e.target.value })}
+            className="border rounded-lg p-2 w-full"
           />
-
           <input
             type="password"
             placeholder="Senha"
             value={novoUsuario.senha}
-            onChange={(e) =>
-              setNovoUsuario({ ...novoUsuario, senha: e.target.value })
-            }
-            className="border border-gray-300 rounded-lg px-3 py-2"
-            required
+            onChange={(e) => setNovoUsuario({ ...novoUsuario, senha: e.target.value })}
+            className="border rounded-lg p-2 w-full"
           />
-
           <select
             value={novoUsuario.tipo}
-            onChange={(e) =>
-              setNovoUsuario({ ...novoUsuario, tipo: e.target.value })
-            }
-            className="border border-gray-300 rounded-lg px-3 py-2"
+            onChange={(e) => setNovoUsuario({ ...novoUsuario, tipo: e.target.value })}
+            className="border rounded-lg p-2 w-full"
           >
             <option value="PACIENTE">Paciente</option>
             <option value="PROFISSIONAL">Profissional</option>
-            <option value="RECEPCIONISTA">Recepcionista</option>
           </select>
 
-          {/* Campos extras só se for PROFISSIONAL */}
+          {/* Campo extra se for profissional */}
           {novoUsuario.tipo === "PROFISSIONAL" && (
-            <>
-              <select
-                value={novoUsuario.especialidadeId}
-                onChange={(e) =>
-                  setNovoUsuario({
-                    ...novoUsuario,
-                    especialidadeId: e.target.value,
-                  })
-                }
-                className="border border-gray-300 rounded-lg px-3 py-2"
-                required
-              >
-                <option value="">Selecione a especialidade</option>
-                {especialidades.map((esp) => (
-                  <option key={esp.id} value={esp.id}>
-                    {esp.nome}
-                  </option>
-                ))}
-              </select>
-
-              <input
-                type="text"
-                placeholder="Formação (ex: Medicina - USP)"
-                value={novoUsuario.formacao}
-                onChange={(e) =>
-                  setNovoUsuario({ ...novoUsuario, formacao: e.target.value })
-                }
-                className="border border-gray-300 rounded-lg px-3 py-2"
-              />
-
-              <input
-                type="text"
-                placeholder="Biografia"
-                value={novoUsuario.biografia}
-                onChange={(e) =>
-                  setNovoUsuario({ ...novoUsuario, biografia: e.target.value })
-                }
-                className="border border-gray-300 rounded-lg px-3 py-2 md:col-span-2"
-              />
-            </>
+            <select
+              value={novoUsuario.especialidadeId}
+              onChange={(e) => setNovoUsuario({ ...novoUsuario, especialidadeId: e.target.value })}
+              className="border rounded-lg p-2 w-full"
+            >
+              <option value="">Selecione a especialidade</option>
+              {especialidades.map((esp) => (
+                <option key={esp.id} value={esp.id}>
+                  {esp.nome}
+                </option>
+              ))}
+            </select>
           )}
         </div>
-
         <button
-          type="submit"
+          onClick={handleCadastrar}
           disabled={loading}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
         >
           {loading ? "Cadastrando..." : "Cadastrar"}
         </button>
-      </form>
+      </motion.div>
 
-      {/* Lista de Usuários */}
-      <div className="bg-white shadow rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Usuários Cadastrados</h2>
-          <input
-            type="text"
-            placeholder="Buscar por nome..."
-            className="border border-gray-300 rounded-lg px-3 py-2"
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
-          />
-        </div>
+      {/* Lista de usuários */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {usuarios.map((user) => (
+          <motion.div
+            key={user.id}
+            className="bg-white p-5 rounded-xl shadow hover:shadow-lg border border-gray-100 transition"
+            whileHover={{ scale: 1.02 }}
+          >
+            <h3 className="text-lg font-semibold text-gray-800">{user.nome}</h3>
+            <p className="text-sm text-gray-500">{user.email}</p>
+            <p className="mt-2 text-xs font-medium px-2 py-1 bg-blue-100 text-blue-700 inline-block rounded">
+              {user.tipo}
+            </p>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border border-gray-200 rounded-lg">
-            <thead className="bg-gray-100 text-gray-700">
-              <tr>
-                <th className="p-2 text-left">Nome</th>
-                <th className="p-2 text-left">E-mail</th>
-                <th className="p-2 text-left">Tipo</th>
-                <th className="p-2 text-left">Especialidade</th>
-                <th className="p-2 text-left">Criado em</th>
-                <th className="p-2 text-left">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {usuariosFiltrados.map((u) => (
-                <tr key={u.id} className="border-b hover:bg-gray-50">
-                  <td className="p-2">{u.nome}</td>
-                  <td className="p-2">{u.email}</td>
-                  <td className="p-2">{u.tipo}</td>
-                  <td className="p-2">
-                    {u.profissional?.especialidade?.nome ?? "-"}
-                  </td>
-                  <td className="p-2">
-                    {new Date(u.criadoEm).toLocaleDateString("pt-BR")}
-                  </td>
-                  <td className="p-2">
-                    <button
-                      onClick={() => handleExcluir(u.id)}
-                      className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                    >
-                      Excluir
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {usuariosFiltrados.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="text-center py-4 text-gray-500 italic"
-                  >
-                    Nenhum usuário encontrado.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => setDetalhes(user)}
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
+              >
+                <Info size={16} /> Informações
+              </button>
+              <button
+                onClick={() => toast.info("Função de edição em desenvolvimento")}
+                className="flex items-center gap-1 text-yellow-600 hover:text-yellow-800"
+              >
+                <Edit size={16} /> Editar
+              </button>
+              <button
+                onClick={() => handleExcluir(user.id)}
+                className="flex items-center gap-1 text-red-600 hover:text-red-800"
+              >
+                <Trash2 size={16} /> Excluir
+              </button>
+            </div>
+          </motion.div>
+        ))}
       </div>
+
+      {/* Modal de informações */}
+      {detalhes && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl w-96 shadow-lg">
+            <h3 className="text-xl font-semibold mb-4">{detalhes.nome}</h3>
+            <p><strong>Email:</strong> {detalhes.email}</p>
+            <p><strong>Tipo:</strong> {detalhes.tipo}</p>
+            <button
+              onClick={() => setDetalhes(null)}
+              className="mt-6 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
