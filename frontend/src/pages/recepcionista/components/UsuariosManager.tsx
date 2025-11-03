@@ -35,7 +35,7 @@ interface NovoUsuarioState {
   nome: string;
   email: string;
   senha: string;
-  tipo: Exclude<TipoUsuario, "RECEPCIONISTA">; // recepcionista não será criado aqui
+  tipo: Exclude<TipoUsuario, "RECEPCIONISTA">;
   especialidadeId: string;
   diasAtendimento: string[];
   horaInicio: string;
@@ -47,8 +47,10 @@ interface NovoUsuarioState {
 
 export default function UsuariosManager() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [usuariosFiltrados, setUsuariosFiltrados] = useState<Usuario[]>([]);
   const [especialidades, setEspecialidades] = useState<Especialidade[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [pesquisa, setPesquisa] = useState<string>("");
 
   const [novoUsuario, setNovoUsuario] = useState<NovoUsuarioState>({
     nome: "",
@@ -74,11 +76,23 @@ export default function UsuariosManager() {
     carregarEspecialidades();
   }, []);
 
+  useEffect(() => {
+    if (pesquisa.trim() === "") {
+      setUsuariosFiltrados(usuarios);
+    } else {
+      const filtro = usuarios.filter((u) =>
+        `${u.nome} ${u.email}`.toLowerCase().includes(pesquisa.toLowerCase())
+      );
+      setUsuariosFiltrados(filtro);
+    }
+  }, [pesquisa, usuarios]);
+
   async function carregarUsuarios(): Promise<void> {
     try {
       setLoading(true);
       const res = await api.get<Usuario[]>("/recepcionista/usuarios");
       setUsuarios(res.data || []);
+      setUsuariosFiltrados(res.data || []);
     } catch (error) {
       console.error("Erro ao carregar usuários:", error);
       toast.error("Erro ao carregar usuários.");
@@ -114,7 +128,6 @@ export default function UsuariosManager() {
     setLoading(true);
 
     try {
-      // montar payload conforme backend espera: remover campos vazios se não for profissional
       const payload: Record<string, unknown> = {
         nome: novoUsuario.nome,
         email: novoUsuario.email,
@@ -186,13 +199,13 @@ export default function UsuariosManager() {
       toast.error("Usuário inválido.");
       return;
     }
-  
+
     const profissionalId = usuarioSelecionado.profissional?.id;
     if (!profissionalId) {
       toast.error("Usuário selecionado não é um profissional.");
       return;
     }
-  
+
     try {
       await api.put(`/profissionais/${profissionalId}`, { fotoPerfil: novaFotoUrl || null });
       toast.success("Foto atualizada.");
@@ -230,7 +243,6 @@ export default function UsuariosManager() {
           </div>
         </div>
 
-        {/* Especialidade aparece primeiro quando tipo PROFISSIONAL */}
         {novoUsuario.tipo === "PROFISSIONAL" && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Especialidade</label>
@@ -373,15 +385,26 @@ export default function UsuariosManager() {
         </div>
       </form>
 
+      {/* Campo de pesquisa */}
+      <div>
+        <input
+          type="text"
+          placeholder="Pesquisar por nome ou e-mail..."
+          value={pesquisa}
+          onChange={(e) => setPesquisa(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 mb-4"
+        />
+      </div>
+
       {/* Lista de usuários */}
       <div>
         <h3 className="text-lg font-medium text-gray-700 mt-6 mb-4">Usuários cadastrados</h3>
 
-        {usuarios.length === 0 ? (
+        {usuariosFiltrados.length === 0 ? (
           <p className="text-gray-600">Nenhum usuário encontrado.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {usuarios.map((u) => (
+            {usuariosFiltrados.map((u) => (
               <div key={u.id} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex gap-4 items-center">
                 <img
                   src={u.profissional?.fotoPerfil && u.profissional.fotoPerfil.trim() !== "" ? u.profissional.fotoPerfil : `https://i.pravatar.cc/100?u=${u.id}`}
@@ -400,12 +423,12 @@ export default function UsuariosManager() {
                     </div>
 
                     <div className="flex flex-col items-end gap-2">
-                    <button
-  onClick={() => abrirModalFoto(u)}
-  className="text-sm text-blue-600 hover:underline"
->
-  Editar Foto
-</button>
+                      <button
+                        onClick={() => abrirModalFoto(u)}
+                        className="text-sm text-blue-600 hover:underline"
+                      >
+                        Editar Foto
+                      </button>
 
                       <button
                         onClick={() => handleExcluirUsuario(u.id)}
