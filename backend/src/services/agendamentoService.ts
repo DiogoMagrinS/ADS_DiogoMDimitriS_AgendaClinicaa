@@ -151,30 +151,20 @@ export async function listarAgendamentosDoUsuario(usuarioId: number) {
 }
 
 export async function listarAgendamentosDoProfissional(profissionalId: number, data?: string) {
-  let filtroData = {};
+  const where: any = { profissionalId };
 
   if (data) {
-    const inicio = new Date(`${data}T00:00:00`);
-    const fim = new Date(`${data}T23:59:59`);
-    filtroData = {
-      data: {
-        gte: inicio,
-        lte: fim,
-      },
-    };
+    const start = new Date(`${data}T00:00:00`);
+    const end = new Date(`${data}T23:59:59`);
+    where.data = { gte: start, lte: end };
   }
 
   return prisma.agendamento.findMany({
-    where: {
-      profissionalId,
-      ...filtroData,
-    },
-    orderBy: { data: "asc" },
+    where,
     include: {
-      paciente: {
-        select: { id: true, nome: true, email: true },
-      },
+      paciente: { select: { nome: true, email: true } },
     },
+    orderBy: { data: 'asc' },
   });
 }
 

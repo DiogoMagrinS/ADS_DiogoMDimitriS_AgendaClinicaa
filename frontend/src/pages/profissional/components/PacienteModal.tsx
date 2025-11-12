@@ -1,40 +1,47 @@
-interface Agendamento {
-    id: number;
-    hora: string;
-    status: string;
-    paciente: {
-      nome: string;
-      email: string;
-    };
-  }
-  
-  interface Props {
-    agendamento: Agendamento;
-    onClose: () => void;
-  }
-  
-  export default function PacienteModal({ agendamento, onClose }: Props) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-        <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Dados do Paciente</h2>
-          <div className="space-y-2 text-sm text-gray-700">
-            <p><span className="text-gray-500">Nome:</span> <span className="font-medium text-gray-900">{agendamento.paciente.nome}</span></p>
-            <p><span className="text-gray-500">Email:</span> <span className="font-medium text-gray-900">{agendamento.paciente.email}</span></p>
-            <p><span className="text-gray-500">Horário:</span> <span className="font-medium text-gray-900">{agendamento.hora}</span></p>
-            <p><span className="text-gray-500">Status:</span> <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">{agendamento.status}</span></p>
-          </div>
+import { X } from 'lucide-react';
 
-          <div className="mt-6 flex justify-end">
-            <button
-              className="text-sm text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg"
-              onClick={onClose}
-            >
-              Fechar
-            </button>
-          </div>
+interface Paciente {
+  nome: string;
+  email: string;
+  telefone?: string;
+}
+
+interface PacienteModalProps {
+  paciente: Paciente | null;
+  onClose: () => void;
+}
+
+export default function PacienteModal({ paciente, onClose }: PacienteModalProps) {
+  if (!paciente) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl relative">
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
+          Detalhes do Paciente
+        </h2>
+
+        <div className="space-y-2 text-gray-700">
+          <p>
+            <span className="font-semibold">Nome:</span> {paciente.nome}
+          </p>
+          <p>
+            <span className="font-semibold">Email:</span> {paciente.email}
+          </p>
+          {paciente.telefone && (
+            <p>
+              <span className="font-semibold">Telefone:</span> {paciente.telefone}
+            </p>
+          )}
         </div>
       </div>
-    );
-  }
-  
+    </div>
+  );
+}

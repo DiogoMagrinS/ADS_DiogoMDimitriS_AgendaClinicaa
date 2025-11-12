@@ -4,6 +4,7 @@ export interface DecodedToken {
   id: number;
   email: string;
   tipo: 'PACIENTE' | 'PROFISSIONAL' | 'RECEPCIONISTA';
+  nome?: string;
   exp: number;
   iat: number;
 }

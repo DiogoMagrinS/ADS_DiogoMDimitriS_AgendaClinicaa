@@ -3,6 +3,16 @@ import api from '../../services/api';
 import { getUserFromToken } from '../../utils/getUserFromToken';
 import { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
+import {
+  Calendar,
+  Clock,
+  User,
+  XCircle,
+  HeartPulse,
+  ClipboardList,
+  Stethoscope,
+  Mail,
+} from 'lucide-react';
 import 'react-toastify/dist/ReactToastify.css';
 
 interface Especialidade {
@@ -40,7 +50,6 @@ export default function DashboardPaciente() {
   const [especialidades, setEspecialidades] = useState<Especialidade[]>([]);
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [profissionalId, setProfissionalId] = useState('');
-    const [, setProfissionalSelecionado] = useState<Profissional | null>(null);
   const [especialidadeId, setEspecialidadeId] = useState('');
   const [data, setData] = useState('');
   const [hora, setHora] = useState('');
@@ -50,10 +59,9 @@ export default function DashboardPaciente() {
   const [loading, setLoading] = useState(true);
 
   const user = getUserFromToken();
+  const dataMinima = new Date().toISOString().split('T')[0];
 
-  // =============================
-  // Carregar dados iniciais
-  // =============================
+  // ============= CARREGAR DADOS INICIAIS =============
   useEffect(() => {
     async function fetchData() {
       try {
@@ -72,52 +80,31 @@ export default function DashboardPaciente() {
     fetchData();
   }, []);
 
-  // =============================
-  // Carregar profissionais
-  // =============================
+  // ============= CARREGAR PROFISSIONAIS =============
   useEffect(() => {
     if (especialidadeId) {
       api
         .get(`/profissionais?especialidade=${especialidadeId}`)
         .then((res) => setProfissionais(res.data))
-        .catch((err) => console.error('Erro ao carregar profissionais:', err));
+        .catch(() => setProfissionais([]));
     } else {
       setProfissionais([]);
-      setProfissionalSelecionado(null);
     }
   }, [especialidadeId]);
 
-  // =============================
-  // Selecionar profissional
-  // =============================
-  const handleSelecionarProfissional = (id: string) => {
-    setProfissionalId(id);
-    const profissional = profissionais.find((p) => p.id === Number(id)) ?? null;
-    setProfissionalSelecionado(profissional);
-    setHorariosDisponiveis([]);
-    setHora('');
-  };
-
-  // =============================
-  // Buscar horários disponíveis
-  // =============================
+  // ============= DISPONIBILIDADE =============
   useEffect(() => {
     if (profissionalId && data) {
       setCarregandoHorarios(true);
       api
         .get(`/profissionais/${profissionalId}/disponibilidade?data=${data}`)
         .then((res) => setHorariosDisponiveis(res.data))
-        .catch((err) => {
-          console.error('Erro ao buscar disponibilidade:', err);
-          setHorariosDisponiveis([]);
-        })
+        .catch(() => setHorariosDisponiveis([]))
         .finally(() => setCarregandoHorarios(false));
     }
   }, [profissionalId, data]);
 
-  // =============================
-  // Criar novo agendamento
-  // =============================
+  // ============= CRIAR AGENDAMENTO =============
   const handleAgendar = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -139,23 +126,20 @@ export default function DashboardPaciente() {
         data: dataHoraSelecionada.toISOString(),
       });
       toast.success('Agendamento criado com sucesso!');
-      setProfissionalId('');
+      const agRes = await api.get('/agendamentos/me');
+      setAgendamentos(agRes.data);
       setEspecialidadeId('');
+      setProfissionalId('');
       setData('');
       setHora('');
       setHorariosDisponiveis([]);
-      const agRes = await api.get('/agendamentos/me');
-      setAgendamentos(agRes.data);
     } catch (error) {
       const err = error as AxiosError<{ erro: string }>;
-      const msg = err.response?.data?.erro ?? 'Erro ao criar agendamento.';
-      toast.error(msg);
+      toast.error(err.response?.data?.erro ?? 'Erro ao criar agendamento.');
     }
   };
 
-  // =============================
-  // Cancelar agendamento
-  // =============================
+  // ============= CANCELAR =============
   const handleCancelar = async (id: number) => {
     if (!confirm('Deseja realmente cancelar este agendamento?')) return;
     try {
@@ -164,102 +148,175 @@ export default function DashboardPaciente() {
         prev.map((a) => (a.id === id ? { ...a, status: 'CANCELADO' } : a))
       );
       toast.success('Agendamento cancelado!');
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Erro ao cancelar agendamento.');
     }
   };
 
-  const dataMinima = new Date().toISOString().split('T')[0];
+  if (loading) return <p className="p-6 text-gray-600">Carregando...</p>;
 
-  if (loading) {
-    return <p className="text-gray-600 p-6">Carregando...</p>;
-  }
+  const proximoAgendamento = agendamentos
+    .filter((a) => new Date(a.data) > new Date() && a.status !== 'CANCELADO')
+    .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())[0];
 
+  const total = agendamentos.length;
+  const confirmados = agendamentos.filter((a) => a.status === 'CONFIRMADO').length;
+  const cancelados = agendamentos.filter((a) => a.status === 'CANCELADO').length;
+  const futuros = agendamentos.filter(
+    (a) => new Date(a.data) > new Date() && a.status !== 'CANCELADO'
+  ).length;
+
+  // =====================================================
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Meu Painel</h1>
+    <div className="p-6 bg-gray-50 min-h-screen space-y-10">
+      {/* CABEÇALHO */}
+      <header className="flex flex-col items-center text-center space-y-2">
+        <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center">
+          <User className="w-10 h-10 text-blue-600" />
+        </div>
+        <h1 className="text-2xl font-semibold text-gray-800">
+          Olá, {user?.nome || user?.email?.split('@')[0]} 👋
+        </h1>
+        <p className="text-gray-500 text-sm">
+          Aqui você pode acompanhar suas consultas e agendar novas.
+        </p>
+      </header>
 
-      {/* Cards resumo */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-blue-600 text-white rounded-lg p-4">
-          <h2 className="text-sm opacity-80">Total de Agendamentos</h2>
-          <p className="text-lg font-semibold mt-1">{agendamentos.length}</p>
+      {/* RESUMO */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white shadow-sm rounded-xl p-4 text-center border border-gray-100">
+          <HeartPulse className="w-6 h-6 mx-auto text-blue-500 mb-2" />
+          <h3 className="text-gray-500 text-sm">Total de Consultas</h3>
+          <p className="text-lg font-bold text-gray-800">{total}</p>
         </div>
-        <div className="bg-green-600 text-white rounded-lg p-4">
-          <h2 className="text-sm opacity-80">Confirmados</h2>
-          <p className="text-lg font-semibold mt-1">
-            {agendamentos.filter((a) => a.status === 'CONFIRMADO').length}
-          </p>
+        <div className="bg-white shadow-sm rounded-xl p-4 text-center border border-gray-100">
+          <Calendar className="w-6 h-6 mx-auto text-green-500 mb-2" />
+          <h3 className="text-gray-500 text-sm">Próximas</h3>
+          <p className="text-lg font-bold text-gray-800">{futuros}</p>
         </div>
-        <div className="bg-yellow-500 text-white rounded-lg p-4">
-          <h2 className="text-sm opacity-80">Pendentes</h2>
-          <p className="text-lg font-semibold mt-1">
-            {agendamentos.filter((a) => a.status === 'AGENDADO').length}
-          </p>
+        <div className="bg-white shadow-sm rounded-xl p-4 text-center border border-gray-100">
+          <ClipboardList className="w-6 h-6 mx-auto text-yellow-500 mb-2" />
+          <h3 className="text-gray-500 text-sm">Confirmadas</h3>
+          <p className="text-lg font-bold text-gray-800">{confirmados}</p>
         </div>
-      </div>
+        <div className="bg-white shadow-sm rounded-xl p-4 text-center border border-gray-100">
+          <XCircle className="w-6 h-6 mx-auto text-red-500 mb-2" />
+          <h3 className="text-gray-500 text-sm">Canceladas</h3>
+          <p className="text-lg font-bold text-gray-800">{cancelados}</p>
+        </div>
+      </section>
 
-      {/* Lista de agendamentos */}
-      <div className="bg-white rounded-xl shadow p-5 mb-8">
-        <h2 className="text-lg font-semibold mb-4">Meus Agendamentos</h2>
+      {/* PRÓXIMA CONSULTA */}
+      {proximoAgendamento && (
+        <section className="bg-blue-50 border border-blue-100 rounded-2xl p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-blue-700 mb-2 flex items-center gap-2">
+            <Calendar className="w-5 h-5" /> Sua próxima consulta
+          </h2>
+          <div className="flex items-center gap-3">
+            <img
+              src={proximoAgendamento.profissional.fotoPerfil || '/default-doctor.png'}
+              alt="Médico"
+              className="w-14 h-14 rounded-full object-cover border"
+            />
+            <div>
+              <p className="font-medium text-gray-800">
+                {proximoAgendamento.profissional.usuario.nome}
+              </p>
+              <p className="text-sm text-gray-500">
+                {proximoAgendamento.profissional.especialidade?.nome}
+              </p>
+              <p className="flex items-center text-sm text-gray-600 gap-1 mt-1">
+                <Clock className="w-4 h-4" />{' '}
+                {new Date(proximoAgendamento.data).toLocaleString('pt-BR')}
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* LISTA DE AGENDAMENTOS */}
+      <section>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <ClipboardList className="w-5 h-5 text-blue-600" /> Meus Agendamentos
+        </h2>
 
         {agendamentos.length === 0 ? (
-          <p className="text-gray-600">Você ainda não possui agendamentos.</p>
+          <div className="text-gray-500 text-center py-10 bg-white rounded-xl shadow-sm">
+            <Stethoscope className="mx-auto w-10 h-10 text-gray-300 mb-3" />
+            <p>Você ainda não possui consultas marcadas.</p>
+          </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border border-gray-200 rounded-lg">
-              <thead className="bg-gray-100 text-gray-700">
-                <tr>
-                  <th className="p-2 text-left">Data</th>
-                  <th className="p-2 text-left">Profissional</th>
-                  <th className="p-2 text-left">Especialidade</th>
-                  <th className="p-2 text-left">Status</th>
-                  <th className="p-2 text-left">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {agendamentos.map((a) => (
-                  <tr key={a.id} className="border-b hover:bg-gray-50 transition">
-                    <td className="p-2">
-                      {new Date(a.data).toLocaleString('pt-BR')}
-                    </td>
-                    <td className="p-2">{a.profissional.usuario.nome}</td>
-                    <td className="p-2">{a.profissional.especialidade?.nome}</td>
-                    <td className="p-2">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          a.status === 'CONFIRMADO'
-                            ? 'bg-green-100 text-green-700'
-                            : a.status === 'CANCELADO'
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-yellow-100 text-yellow-700'
-                        }`}
-                      >
-                        {a.status}
-                      </span>
-                    </td>
-                    <td className="p-2">
-                      {a.status !== 'CANCELADO' && (
-                        <button
-                          onClick={() => handleCancelar(a.id)}
-                          className="bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600"
-                        >
-                          Cancelar
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {agendamentos.map((a) => (
+              <div
+                key={a.id}
+                className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <img
+                    src={a.profissional.fotoPerfil || '/default-doctor.png'}
+                    alt="Médico"
+                    className="w-14 h-14 rounded-full object-cover border"
+                  />
+                  <div>
+                    <p className="font-semibold text-gray-800">
+                      {a.profissional.usuario.nome}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {a.profissional.especialidade?.nome}
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-gray-700 text-sm flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-gray-400" />
+                  {new Date(a.data).toLocaleDateString('pt-BR')}
+                </p>
+                <p className="text-gray-700 text-sm mb-2 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-gray-400" />
+                  {new Date(a.data).toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+
+                <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                  <Mail className="w-4 h-4" />
+                  {a.profissional.usuario.email}
+                </div>
+
+                <span
+                  className={`inline-block px-3 py-1 text-xs font-semibold rounded-full mb-3 ${
+                    a.status === 'CONFIRMADO'
+                      ? 'bg-green-100 text-green-700'
+                      : a.status === 'CANCELADO'
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-yellow-100 text-yellow-700'
+                  }`}
+                >
+                  {a.status}
+                </span>
+
+                {a.status !== 'CANCELADO' && (
+                  <button
+                    onClick={() => handleCancelar(a.id)}
+                    className="flex items-center gap-1 bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition"
+                  >
+                    <XCircle className="w-4 h-4" /> Cancelar
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Criar novo agendamento */}
-      <div className="bg-white rounded-xl shadow p-5">
-        <h2 className="text-lg font-semibold mb-4">Novo Agendamento</h2>
+      {/* NOVO AGENDAMENTO */}
+      <section className="bg-white rounded-2xl shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          Agendar nova consulta
+        </h2>
+
         <form
           onSubmit={handleAgendar}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
@@ -267,7 +324,7 @@ export default function DashboardPaciente() {
           <select
             value={especialidadeId}
             onChange={(e) => setEspecialidadeId(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2"
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
             required
           >
             <option value="">Especialidade</option>
@@ -280,8 +337,8 @@ export default function DashboardPaciente() {
 
           <select
             value={profissionalId}
-            onChange={(e) => handleSelecionarProfissional(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2"
+            onChange={(e) => setProfissionalId(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
             required
           >
             <option value="">Profissional</option>
@@ -297,14 +354,14 @@ export default function DashboardPaciente() {
             value={data}
             onChange={(e) => setData(e.target.value)}
             min={dataMinima}
-            className="border border-gray-300 rounded-lg px-3 py-2"
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
             required
           />
 
           <select
             value={hora}
             onChange={(e) => setHora(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2"
+            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
             disabled={carregandoHorarios || !horariosDisponiveis.length}
             required
           >
@@ -325,7 +382,7 @@ export default function DashboardPaciente() {
             Agendar
           </button>
         </form>
-      </div>
+      </section>
     </div>
   );
 }

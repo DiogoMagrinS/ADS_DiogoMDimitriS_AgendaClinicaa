@@ -1,57 +1,81 @@
+import { CheckCircle, XCircle, ClipboardCheck } from 'lucide-react';
+
+interface Paciente {
+  nome: string;
+  email: string;
+  telefone?: string;
+}
+
 interface Agendamento {
-    id: number;
-    hora: string;
-    status: string;
-    paciente: {
-      nome: string;
-      email: string;
-    };
-  }
-  
-  interface Props {
-    agendamento: Agendamento;
-    onAtualizarStatus: (id: number, status: string) => void;
-    onVerPaciente: () => void;
-  }
-  
-  export default function AgendamentoCard({ agendamento, onAtualizarStatus, onVerPaciente }: Props) {
-    return (
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <p className="text-gray-900 font-medium">{agendamento.paciente.nome}</p>
-          <div className="mt-1 flex gap-4 text-sm text-gray-600">
-            <span>Horário: <span className="text-gray-900 font-medium">{agendamento.hora}</span></span>
-            <span className="inline-flex items-center gap-2">
-              Status:
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">{agendamento.status}</span>
-            </span>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {agendamento.status !== "CONFIRMADO" && (
-            <button
-              className="text-sm text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg"
-              onClick={() => onAtualizarStatus(agendamento.id, "CONFIRMADO")}
-            >
-              Confirmar
-            </button>
-          )}
-          {agendamento.status !== "CANCELADO" && (
-            <button
-              className="text-sm text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg"
-              onClick={() => onAtualizarStatus(agendamento.id, "CANCELADO")}
-            >
-              Cancelar
-            </button>
-          )}
-          <button
-            className="text-sm text-gray-700 hover:text-gray-900 px-3 py-2 rounded-lg border border-gray-200"
-            onClick={onVerPaciente}
-          >
-            Detalhes
-          </button>
-        </div>
+  id: number;
+  data: string;
+  status: string;
+  paciente: Paciente;
+}
+
+interface Props {
+  agendamento: Agendamento;
+  onStatusChange: (id: number, novoStatus: string) => void;
+}
+
+export default function AgendamentoCard({ agendamento, onStatusChange }: Props) {
+  const { id, data, status, paciente } = agendamento;
+  const hora = new Date(data).toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  const statusColors: Record<string, string> = {
+    CONFIRMADO: 'text-green-600 bg-green-100',
+    CANCELADO: 'text-red-600 bg-red-100',
+    ATENDIDO: 'text-indigo-600 bg-indigo-100',
+    PENDENTE: 'text-yellow-600 bg-yellow-100',
+  };
+
+  return (
+    <div className="bg-white shadow rounded-xl p-5 border border-gray-100 hover:shadow-md transition-all duration-200">
+      <div className="flex justify-between items-center mb-2">
+        <p className="text-sm text-gray-500">{hora}</p>
+        <span
+          className={`text-xs font-semibold px-2 py-1 rounded-full ${
+            statusColors[status] || 'bg-gray-100 text-gray-600'
+          }`}
+        >
+          {status}
+        </span>
       </div>
-    );
-  }
-  
+
+      <div className="mb-3">
+        <p className="font-semibold text-gray-800">{paciente.nome}</p>
+        <p className="text-sm text-gray-500">{paciente.email}</p>
+      </div>
+
+      <div className="flex justify-between mt-4">
+        {status !== 'ATENDIDO' && (
+          <button
+            onClick={() => onStatusChange(id, 'ATENDIDO')}
+            className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-800 transition"
+          >
+            <ClipboardCheck className="w-4 h-4" /> Atendido
+          </button>
+        )}
+        {status !== 'CONFIRMADO' && (
+          <button
+            onClick={() => onStatusChange(id, 'CONFIRMADO')}
+            className="flex items-center gap-1 text-sm text-green-600 hover:text-green-800 transition"
+          >
+            <CheckCircle className="w-4 h-4" /> Confirmar
+          </button>
+        )}
+        {status !== 'CANCELADO' && (
+          <button
+            onClick={() => onStatusChange(id, 'CANCELADO')}
+            className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800 transition"
+          >
+            <XCircle className="w-4 h-4" /> Cancelar
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

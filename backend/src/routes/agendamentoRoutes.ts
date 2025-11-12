@@ -25,4 +25,6 @@ router.put('/:id', putAgendamento);
 router.delete('/:id', deleteAgendamento);
 router.get('/profissional/me', listarAgendamentosProfissional);
 
+router.get('/me', autenticarToken, listarAgendamentosUsuario);
+router.get('/me/profissional', autenticarToken, listarAgendamentosProfissional);
 export default router;
