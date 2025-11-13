@@ -1,18 +1,15 @@
-import React, { useEffect, useState } from "react"; // removido useMemo
+import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import { getUserFromToken } from "../../utils/getUserFromToken";
 import { toast } from "react-toastify";
 import {
   CalendarDays,
-  User,
-  Mail,
-  CheckCircle,
-  XCircle,
   RefreshCw,
   Stethoscope,
   Activity,
   TrendingUp,
-  Percent,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 
 interface DecodedUser {
@@ -42,56 +39,61 @@ const DashboardProfissional: React.FC = () => {
   const user = getUserFromToken() as DecodedUser | null;
   const [agendamentos, setAgendamentos] = useState<AgendamentoRaw[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedPaciente, setSelectedPaciente] = useState<Paciente | null>(null);
 
-  // ✅ Nova função fetchAgendamentos
+  // Buscar agendamentos do profissional
   const fetchAgendamentos = async () => {
     try {
+      setRefreshing(true);
       const response = await api.get("/agendamentos/me/profissional");
       setAgendamentos(response.data);
     } catch (error) {
-      console.error("Erro ao buscar agendamentos do profissional:", error);
+      console.error("Erro ao buscar agendamentos:", error);
       toast.error("Erro ao carregar agendamentos.");
     } finally {
       setRefreshing(false);
     }
   };
 
-  // ✅ Novo useEffect simples
   useEffect(() => {
     fetchAgendamentos();
-  }, []); // sem dependências adicionais
+  }, []);
 
-  // ✅ Estatísticas
-  const agList = agendamentos;
-  const total = agList.length;
-  const confirmados = agList.filter((a) => a.status === "CONFIRMADO").length;
-  const cancelados = agList.filter((a) => a.status === "CANCELADO").length;
-  const atendidos = agList.filter((a) => a.status === "ATENDIDO").length;
+  // Estatísticas
+  const total = agendamentos.length;
+  const confirmados = agendamentos.filter(a => a.status === "CONFIRMADO").length;
+  const cancelados = agendamentos.filter(a => a.status === "CANCELADO").length;
+  const atendidos = agendamentos.filter(a => a.status === "ATENDIDO").length;
   const pendentes = total - confirmados - cancelados - atendidos;
   const taxaComparecimento = total > 0 ? Math.round(((confirmados + atendidos) / total) * 100) : 0;
 
-  const proximos = agList
-    .filter((a) => new Date(a.data) > new Date())
+  const proximos = agendamentos
+    .filter(a => new Date(a.data) > new Date())
     .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
     .slice(0, 3);
 
   const handleMudarStatus = async (id: number, novoStatus: string) => {
     try {
       await api.patch(`/agendamentos/${id}/status`, { status: novoStatus });
-      setAgendamentos((prev) =>
-        prev.map((a) => (a.id === id ? { ...a, status: novoStatus } : a))
-      );
-      toast.success("Status atualizado.");
+      setAgendamentos(prev => prev.map(a => (a.id === id ? { ...a, status: novoStatus } : a)));
+      toast.success("Status atualizado!");
     } catch (err) {
       console.error("Erro ao atualizar status:", err);
       toast.error("Erro ao atualizar status.");
     }
   };
 
+  // Gráfico circular simples
+  const graficoPercentuais = [
+    { cor: "bg-green-500", valor: confirmados },
+    { cor: "bg-indigo-500", valor: atendidos },
+    { cor: "bg-yellow-500", valor: pendentes },
+    { cor: "bg-red-500", valor: cancelados },
+  ];
+  const somaTotal = graficoPercentuais.reduce((acc, s) => acc + s.valor, 0);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
+      {/* Header */}
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-semibold text-gray-800 flex items-center gap-3">
@@ -103,25 +105,46 @@ const DashboardProfissional: React.FC = () => {
 
         <button
           onClick={fetchAgendamentos}
-          className="flex items-center gap-2 bg-white border border-gray-200 px-3 py-2 rounded-lg shadow-sm hover:shadow"
+          className="flex items-center gap-2 bg-white border border-gray-200 px-3 py-2 rounded-lg shadow-sm hover:shadow transition"
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
           Atualizar
         </button>
       </header>
 
-      {/* Estatísticas */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
-        <StatCard title="Total" value={total} icon={<CalendarDays />} color="blue" />
-        <StatCard title="Confirmados" value={confirmados} icon={<CheckCircle />} color="green" />
-        <StatCard title="Atendidos" value={atendidos} icon={<Activity />} color="indigo" />
-        <StatCard title="Pendentes" value={pendentes} icon={<TrendingUp />} color="yellow" />
-        <StatCard title="Cancelados" value={cancelados} icon={<XCircle />} color="red" />
-        <StatCard title="Comparecimento (%)" value={`${taxaComparecimento}%`} icon={<Percent />} color="purple" />
+      {/* Estatísticas + Gráfico */}
+      <section className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-10">
+        <div className="lg:col-span-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <StatCard title="Confirmados" value={confirmados} color="green" icon={<CheckCircle />} />
+          <StatCard title="Atendidos" value={atendidos} color="indigo" icon={<Activity />} />
+          <StatCard title="Pendentes" value={pendentes} color="yellow" icon={<TrendingUp />} />
+          <StatCard title="Cancelados" value={cancelados} color="red" icon={<XCircle />} />
+        </div>
+
+        <div className="bg-white p-5 rounded-xl shadow-sm flex flex-col items-center justify-center border border-gray-100">
+          <h3 className="text-gray-700 font-medium mb-3">Comparecimento</h3>
+          <div className="relative w-28 h-28">
+            <div className="absolute inset-0 rounded-full bg-gray-200" />
+            <div
+              className="absolute inset-0 rounded-full origin-center rotate-[-90deg]"
+              style={{
+                background: `conic-gradient(
+                  #22c55e ${((confirmados / somaTotal) * 360) || 0}deg,
+                  #6366f1 ${((confirmados + atendidos) / somaTotal) * 360 || 0}deg,
+                  #eab308 ${((confirmados + atendidos + pendentes) / somaTotal) * 360 || 0}deg,
+                  #ef4444 360deg
+                )`,
+              }}
+            ></div>
+            <div className="absolute inset-3 bg-white rounded-full flex items-center justify-center text-lg font-semibold text-gray-700">
+              {taxaComparecimento}%
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Próximos atendimentos */}
-      <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
+      <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-10">
         <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
           <CalendarDays className="w-5 h-5 text-blue-600" /> Próximos atendimentos
         </h2>
@@ -129,108 +152,177 @@ const DashboardProfissional: React.FC = () => {
         {proximos.length === 0 ? (
           <p className="text-gray-500">Nenhum atendimento futuro próximo.</p>
         ) : (
-          <ul className="space-y-3">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {proximos.map((a) => (
-              <li key={a.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
-                <div className="flex items-center gap-3">
-                  <User className="w-6 h-6 text-gray-600" />
-                  <div>
-                    <p className="font-medium text-gray-800">{a.paciente?.nome || "—"}</p>
-                    <p className="text-sm text-gray-500 flex items-center gap-2">
-                      <Mail className="w-4 h-4" /> {a.paciente?.email || "—"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="font-semibold text-blue-600">{(a.data)}</p>
-                    <p className="text-xs text-gray-500">{new Date(a.data).toLocaleDateString("pt-BR")}</p>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleMudarStatus(a.id, "ATENDIDO")}
-                      className="text-indigo-600 hover:text-indigo-800"
-                      title="Marcar como atendido"
-                    >
-                      <CheckCircle className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleMudarStatus(a.id, "CONFIRMADO")}
-                      className="text-green-600 hover:text-green-800"
-                      title="Confirmar"
-                    >
-                      <CheckCircle className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleMudarStatus(a.id, "CANCELADO")}
-                      className="text-red-600 hover:text-red-800"
-                      title="Cancelar"
-                    >
-                      <XCircle className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* Lista completa */}
-      <section className="space-y-6">
-        {agendamentos.length === 0 ? (
-          <p className="text-center text-gray-500">Nenhum agendamento encontrado.</p>
-        ) : (
-          agendamentos.map((a) => (
-            <div key={a.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <User className="w-5 h-5 text-gray-500" />
-                  <div>
-                    <p className="font-medium text-gray-800">{a.paciente?.nome || "—"}</p>
-                    <p className="text-sm text-gray-500">{a.especialidade?.nome || ""}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-blue-600">{(a.data)}</p>
-                  <p className="text-xs text-gray-500">{new Date(a.data).toLocaleDateString("pt-BR")}</p>
+              <div key={a.id} className="p-4 border rounded-xl shadow-sm hover:shadow-md transition bg-gray-50">
+                <p className="font-medium text-gray-800">{a.paciente?.nome || "—"}</p>
+                <p className="text-sm text-gray-500">{a.especialidade?.nome || ""}</p>
+                <p className="text-sm text-gray-600 mt-2">
+                  {new Date(a.data).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                </p>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => handleMudarStatus(a.id, "CONFIRMADO")}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-1 rounded-md text-sm"
+                  >
+                    Confirmar
+                  </button>
+                  <button
+                  onClick={() => handleMudarStatus(a.id, "FINALIZADO")}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-3 py-1 rounded-lg transition"
+                >
+                  Finalizar
+                </button>
+                  <button
+                    onClick={() => handleMudarStatus(a.id, "CANCELADO")}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white py-1 rounded-md text-sm"
+                  >
+                    Cancelar
+                  </button>
+                  
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </section>
 
-      {selectedPaciente && (
-        <PacienteModal paciente={selectedPaciente} onClose={() => setSelectedPaciente(null)} />
-      )}
+      {/* Todos os Agendamentos */}
+      <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <CalendarDays className="w-5 h-5 text-blue-600" /> Todos os agendamentos
+        </h2>
+
+        {agendamentos.length === 0 ? (
+          <p className="text-gray-500 text-center">Nenhum agendamento encontrado.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {agendamentos.map((a) => (
+              <div
+                key={a.id}
+                className="rounded-xl border border-gray-200 bg-gray-50 hover:bg-white transition p-5 shadow-sm hover:shadow-md flex flex-col justify-between"
+              >
+                {/* Cabeçalho */}
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-semibold text-gray-800">
+                      {a.paciente?.nome || "Paciente não identificado"}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {a.especialidade?.nome || "—"}
+                    </p>
+                  </div>
+                  <span
+                    className={`text-xs font-semibold px-2 py-1 rounded ${
+                      a.status === "CONFIRMADO"
+                        ? "bg-green-100 text-green-700"
+                        : a.status === "CANCELADO"
+                        ? "bg-red-100 text-red-700"
+                        : a.status === "FINALIZADO"
+                        ? "bg-indigo-100 text-indigo-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {a.status}
+                  </span>
+                </div>
+
+                {/* Informações */}
+                <div className="mt-4 text-sm text-gray-700 space-y-1">
+                  <p>
+                    <strong>Data:</strong>{" "}
+                    {new Date(a.data).toLocaleString("pt-BR", {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    })}
+                  </p>
+                  {a.paciente?.email && (
+                    <p>
+                      <strong>Email:</strong> {a.paciente.email}
+                    </p>
+                  )}
+                  {a.observacoes && (
+                    <p>
+                      <strong>Obs:</strong> {a.observacoes}
+                    </p>
+                  )}
+                </div>
+
+                {/* Ações */}
+                <div className="mt-5 flex flex-wrap justify-between items-center gap-2">
+                  <button
+                    onClick={() => handleMudarStatus(a.id, "CONFIRMADO")}
+                    className="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded-lg transition"
+                  >
+                    Confirmar
+                  </button>
+
+                  <button
+                    onClick={() => handleMudarStatus(a.id, "CANCELADO")}
+                    className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1 rounded-lg transition"
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                  onClick={() => handleMudarStatus(a.id, "FINALIZADO")}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-3 py-1 rounded-lg transition"
+                >
+                  Finalizar
+                </button>
+
+                  {/* Só aparece se o agendamento estiver FINALIZADO */}
+                  {a.status === "FINALIZADO" && (
+                    <button
+                      onClick={async () => {
+                        if (confirm("Deseja realmente excluir este agendamento?")) {
+                          try {
+                            await api.delete(`/agendamentos/${a.id}`);
+                            setAgendamentos((prev) =>
+                              prev.filter((ag) => ag.id !== a.id)
+                            );
+                            toast.success("Agendamento excluído com sucesso!");
+                          } catch (error) {
+                            console.error(error);
+                            toast.error("Erro ao excluir agendamento.");
+                          }
+                        }
+                      }}
+                      className="bg-gray-600 hover:bg-gray-700 text-white text-sm px-3 py-1 rounded-lg transition"
+                    >
+                      Excluir
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
     </div>
   );
 };
 
 export default DashboardProfissional;
 
-// Subcomponentes
+// Subcomponente
 const StatCard = ({
   title,
   value,
-  icon,
   color,
+  icon,
 }: {
   title: string;
   value: number | string;
-  icon: React.ReactNode;
   color: string;
+  icon: React.ReactNode;
 }) => {
   const bg = {
-    blue: "bg-blue-600",
     green: "bg-green-600",
+    indigo: "bg-indigo-600",
     yellow: "bg-yellow-500",
     red: "bg-red-600",
-    indigo: "bg-indigo-600",
-    purple: "bg-purple-600",
   }[color || "blue"];
 
   return (
@@ -243,34 +335,3 @@ const StatCard = ({
     </div>
   );
 };
-
-const PacienteModal = ({
-  paciente,
-  onClose,
-}: {
-  paciente: Paciente;
-  onClose: () => void;
-}) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-    <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl relative">
-      <button
-        onClick={onClose}
-        className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-      >
-        Fechar
-      </button>
-      <h3 className="text-lg font-semibold mb-4">Detalhes do Paciente</h3>
-      <div className="space-y-3 text-gray-700">
-        <p>
-          <strong>Nome:</strong> {paciente.nome}
-        </p>
-        <p>
-          <strong>Email:</strong> {paciente.email || "-"}
-        </p>
-        <p>
-          <strong>Telefone:</strong> {paciente.telefone || "-"}
-        </p>
-      </div>
-    </div>
-  </div>
-);

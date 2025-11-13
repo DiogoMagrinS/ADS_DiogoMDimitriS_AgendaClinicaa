@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, StatusAgendamento } from '@prisma/client';
 import {
   listarAgendamentos,
   buscarAgendamentoPorId,
@@ -104,7 +104,6 @@ export async function getHistoricoStatus(req: Request, res: Response) {
   }
 }
 
-
 export async function listarAgendamentosProfissional(req: Request, res: Response) {
   try {
     if (!req.usuario) {
@@ -118,7 +117,6 @@ export async function listarAgendamentosProfissional(req: Request, res: Response
       return res.status(403).json({ erro: "Acesso permitido apenas para profissionais." });
     }
 
-    // busca id do profissional vinculado ao usuário
     const profissional = await prisma.profissional.findUnique({
       where: { usuarioId },
     });
@@ -137,12 +135,13 @@ export async function listarAgendamentosProfissional(req: Request, res: Response
   }
 }
 
+// 🔄 Atualizar status do agendamento
 export async function atualizarStatus(req: Request, res: Response) {
   try {
     const id = parseInt(req.params.id);
-    const { status } = req.body; // esperado: 'CONFIRMADO' ou 'CANCELADO'
+    const { status } = req.body; // esperado: 'CONFIRMADO', 'CANCELADO' ou 'FINALIZADO'
 
-    if (!['CONFIRMADO', 'CANCELADO'].includes(status)) {
+    if (!['CONFIRMADO', 'CANCELADO', 'FINALIZADO'].includes(status)) {
       return res.status(400).json({ erro: 'Status inválido.' });
     }
 
@@ -156,4 +155,17 @@ export async function atualizarStatus(req: Request, res: Response) {
     console.error(error);
     res.status(400).json({ erro: error.message });
   }
+}
+
+// ⏰ Cancela automaticamente agendamentos antigos não confirmados
+export async function cancelarAgendamentosAntigos(prisma: PrismaClient) {
+  const agora = new Date();
+
+  await prisma.agendamento.updateMany({
+    where: {
+      data: { lt: agora },
+      status: { in: [StatusAgendamento.AGENDADO, StatusAgendamento.CONFIRMADO] },
+    },
+    data: { status: StatusAgendamento.CANCELADO },
+  });
 }

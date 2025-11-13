@@ -74,3 +74,5 @@ Método	            Rota	                                                    Des
 
 GET	        http://localhost:3000/healthcheck	                        Verifica se o servidor está online
 
+
+Aparecer opção confirmado em "proximo Agendamentos"
