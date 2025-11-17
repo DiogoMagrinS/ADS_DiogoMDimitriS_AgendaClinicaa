@@ -93,8 +93,8 @@ export default function EspecialidadesManager(): JSX.Element {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow p-6 space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800">Gerenciar Especialidades</h2>
+    <div className="bg-white/90 rounded-xl shadow p-6 space-y-6 border border-white/40 backdrop-blur-sm text-[var(--ink)]">
+      <h2 className="text-2xl font-bold">Gerenciar Especialidades</h2>
 
       {/* Adicionar nova */}
       <form onSubmit={handleCriar} className="flex gap-2">
@@ -103,11 +103,11 @@ export default function EspecialidadesManager(): JSX.Element {
           placeholder="Nome da especialidade"
           value={novaEspecialidade}
           onChange={(e) => setNovaEspecialidade(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 flex-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="border border-[var(--sand-300)] rounded-lg px-3 py-2 flex-1 focus:ring-2 focus:ring-[var(--sand-400)] focus:outline-none bg-white/90"
         />
         <button
           type="submit"
-          className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+          className="bg-gradient-to-r from-[var(--sand-300)] to-[var(--sand-500)] text-white px-5 py-2 rounded-lg hover:from-[var(--sand-400)] hover:to-[var(--sand-600)] transition"
         >
           Adicionar
         </button>
@@ -115,13 +115,13 @@ export default function EspecialidadesManager(): JSX.Element {
 
       {/* Tabela */}
       {carregando ? (
-        <p className="text-gray-600">Carregando especialidades...</p>
+        <p className="text-[var(--text-muted)]">Carregando especialidades...</p>
       ) : especialidades.length === 0 ? (
-        <p className="text-gray-600">Nenhuma especialidade cadastrada.</p>
+        <p className="text-[var(--text-muted)]">Nenhuma especialidade cadastrada.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full border border-gray-200 rounded-lg text-sm">
-            <thead className="bg-gray-100 text-gray-700">
+          <table className="w-full border border-[var(--sand-200)] rounded-lg text-sm">
+            <thead className="bg-[var(--sand-100)] text-[var(--ink)]">
               <tr>
                 <th className="p-3 text-left">ID</th>
                 <th className="p-3 text-left">Nome</th>
@@ -131,7 +131,7 @@ export default function EspecialidadesManager(): JSX.Element {
             </thead>
             <tbody>
               {especialidades.map((esp) => (
-                <tr key={esp.id} className="border-b hover:bg-gray-50 transition">
+                <tr key={esp.id} className="border-b border-[var(--sand-200)] hover:bg-[var(--sand-50)] transition">
                   <td className="p-3">{esp.id}</td>
                   <td className="p-3">
                     {editando?.id === esp.id ? (
@@ -141,7 +141,7 @@ export default function EspecialidadesManager(): JSX.Element {
                         onChange={(e) =>
                           setEditando({ ...editando, nome: e.target.value })
                         }
-                        className="border border-gray-300 rounded px-2 py-1 w-full focus:ring-2 focus:ring-blue-500"
+                        className="border border-[var(--sand-300)] rounded px-2 py-1 w-full focus:ring-2 focus:ring-[var(--sand-400)] bg-white/90"
                       />
                     ) : (
                       esp.nome
@@ -155,13 +155,13 @@ export default function EspecialidadesManager(): JSX.Element {
                       <>
                         <button
                           onClick={handleSalvarEdicao}
-                          className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                          className="px-3 py-1 bg-[var(--sage-300)] text-[var(--sand-700)] rounded hover:bg-[var(--sage-100)]"
                         >
                           Salvar
                         </button>
                         <button
                           onClick={() => setEditando(null)}
-                          className="px-3 py-1 bg-gray-400 text-white rounded hover:bg-gray-500"
+                          className="px-3 py-1 bg-[var(--sand-200)] text-[var(--sand-700)] rounded hover:bg-[var(--sand-100)]"
                         >
                           Cancelar
                         </button>
@@ -170,13 +170,13 @@ export default function EspecialidadesManager(): JSX.Element {
                       <>
                         <button
                           onClick={() => setEditando(esp)}
-                          className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                          className="px-3 py-1 bg-[var(--sand-500)] text-white rounded hover:bg-[var(--sand-600)]"
                         >
                           Editar
                         </button>
                         <button
                           onClick={() => handleExcluir(esp.id)}
-                          className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                          className="px-3 py-1 bg-[#e0a39b] text-[#5d2b26] rounded hover:bg-[#d48f86]"
                         >
                           Excluir
                         </button>

@@ -14,6 +14,7 @@ import {
   Mail,
 } from 'lucide-react';
 import 'react-toastify/dist/ReactToastify.css';
+import GlassPage from '../../components/GlassPage';
 
 interface Especialidade {
   id: number;
@@ -168,221 +169,213 @@ export default function DashboardPaciente() {
 
   // =====================================================
   return (
-    <div className="p-6 bg-gray-50 min-h-screen space-y-10">
-      {/* CABEÇALHO */}
-      <header className="flex flex-col items-center text-center space-y-2">
-        <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center">
-          <User className="w-10 h-10 text-blue-600" />
-        </div>
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Olá, {user?.nome || user?.email?.split('@')[0]} 👋
-        </h1>
-        <p className="text-gray-500 text-sm">
-          Aqui você pode acompanhar suas consultas e agendar novas.
-        </p>
-      </header>
+    <GlassPage
+      maxWidthClass="w-full"
+      contentClassName="glass-content"
+      className="pb-12"
+      withCard={false}
+    >
+      <div className="space-y-10">
+        <header className="flex flex-col items-center text-center space-y-2">
+          <div className="w-20 h-20 rounded-full bg-[var(--sand-200)] flex items-center justify-center">
+            <User className="w-10 h-10 text-[var(--sand-600)]" />
+          </div>
+          <h1 className="text-2xl font-semibold text-[var(--ink)]">
+            Olá, {user?.nome || user?.email?.split("@")[0]} 👋
+          </h1>
+          <p className="text-[var(--text-muted)] text-sm">
+            Aqui você pode acompanhar suas consultas e agendar novas.
+          </p>
+        </header>
 
-      {/* RESUMO */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white shadow-sm rounded-xl p-4 text-center border border-gray-100">
-          <HeartPulse className="w-6 h-6 mx-auto text-blue-500 mb-2" />
-          <h3 className="text-gray-500 text-sm">Total de Consultas</h3>
-          <p className="text-lg font-bold text-gray-800">{total}</p>
-        </div>
-        <div className="bg-white shadow-sm rounded-xl p-4 text-center border border-gray-100">
-          <Calendar className="w-6 h-6 mx-auto text-green-500 mb-2" />
-          <h3 className="text-gray-500 text-sm">Próximas</h3>
-          <p className="text-lg font-bold text-gray-800">{futuros}</p>
-        </div>
-        <div className="bg-white shadow-sm rounded-xl p-4 text-center border border-gray-100">
-          <ClipboardList className="w-6 h-6 mx-auto text-yellow-500 mb-2" />
-          <h3 className="text-gray-500 text-sm">Confirmadas</h3>
-          <p className="text-lg font-bold text-gray-800">{confirmados}</p>
-        </div>
-        <div className="bg-white shadow-sm rounded-xl p-4 text-center border border-gray-100">
-          <XCircle className="w-6 h-6 mx-auto text-red-500 mb-2" />
-          <h3 className="text-gray-500 text-sm">Canceladas</h3>
-          <p className="text-lg font-bold text-gray-800">{cancelados}</p>
-        </div>
-      </section>
-
-      {/* PRÓXIMA CONSULTA */}
-      {proximoAgendamento && (
-        <section className="bg-blue-50 border border-blue-100 rounded-2xl p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-blue-700 mb-2 flex items-center gap-2">
-            <Calendar className="w-5 h-5" /> Sua próxima consulta
-          </h2>
-          <div className="flex items-center gap-3">
-            <img
-              src={proximoAgendamento.profissional.fotoPerfil || '/default-doctor.png'}
-              alt="Médico"
-              className="w-14 h-14 rounded-full object-cover border"
-            />
-            <div>
-              <p className="font-medium text-gray-800">
-                {proximoAgendamento.profissional.usuario.nome}
-              </p>
-              <p className="text-sm text-gray-500">
-                {proximoAgendamento.profissional.especialidade?.nome}
-              </p>
-              <p className="flex items-center text-sm text-gray-600 gap-1 mt-1">
-                <Clock className="w-4 h-4" />{' '}
-                {new Date(proximoAgendamento.data).toLocaleString('pt-BR')}
-              </p>
-            </div>
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white/90 shadow-sm rounded-xl p-4 text-center border border-white/40 backdrop-blur-sm">
+            <HeartPulse className="w-6 h-6 mx-auto text-[var(--sand-600)] mb-2" />
+            <h3 className="text-[var(--text-muted)] text-sm">Total de Consultas</h3>
+            <p className="text-lg font-bold text-[var(--ink)]">{total}</p>
+          </div>
+          <div className="bg-white/90 shadow-sm rounded-xl p-4 text-center border border-white/40 backdrop-blur-sm">
+            <Calendar className="w-6 h-6 mx-auto text-[var(--sand-600)] mb-2" />
+            <h3 className="text-[var(--text-muted)] text-sm">Próximas</h3>
+            <p className="text-lg font-bold text-[var(--ink)]">{futuros}</p>
+          </div>
+          <div className="bg-white/90 shadow-sm rounded-xl p-4 text-center border border-white/40 backdrop-blur-sm">
+            <ClipboardList className="w-6 h-6 mx-auto text-[var(--sand-600)] mb-2" />
+            <h3 className="text-[var(--text-muted)] text-sm">Confirmadas</h3>
+            <p className="text-lg font-bold text-[var(--ink)]">{confirmados}</p>
+          </div>
+          <div className="bg-white/90 shadow-sm rounded-xl p-4 text-center border border-white/40 backdrop-blur-sm">
+            <XCircle className="w-6 h-6 mx-auto text-[var(--sand-600)] mb-2" />
+            <h3 className="text-[var(--text-muted)] text-sm">Canceladas</h3>
+            <p className="text-lg font-bold text-[var(--ink)]">{cancelados}</p>
           </div>
         </section>
-      )}
 
-      {/* LISTA DE AGENDAMENTOS */}
-      <section>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <ClipboardList className="w-5 h-5 text-blue-600" /> Meus Agendamentos
-        </h2>
-
-        {agendamentos.length === 0 ? (
-          <div className="text-gray-500 text-center py-10 bg-white rounded-xl shadow-sm">
-            <Stethoscope className="mx-auto w-10 h-10 text-gray-300 mb-3" />
-            <p>Você ainda não possui consultas marcadas.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {agendamentos.map((a) => (
-              <div
-                key={a.id}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <img
-                    src={a.profissional.fotoPerfil || '/default-doctor.png'}
-                    alt="Médico"
-                    className="w-14 h-14 rounded-full object-cover border"
-                  />
-                  <div>
-                    <p className="font-semibold text-gray-800">
-                      {a.profissional.usuario.nome}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {a.profissional.especialidade?.nome}
-                    </p>
-                  </div>
-                </div>
-
-                <p className="text-gray-700 text-sm flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-400" />
-                  {new Date(a.data).toLocaleDateString('pt-BR')}
+        {proximoAgendamento && (
+          <section className="bg-[var(--sage-100)] border border-[var(--sage-300)] rounded-2xl p-5 shadow-sm backdrop-blur-sm">
+            <h2 className="text-lg font-semibold text-[var(--sand-600)] mb-2 flex items-center gap-2">
+              <Calendar className="w-5 h-5" /> Sua próxima consulta
+            </h2>
+            <div className="flex items-center gap-3">
+              <img
+                src={proximoAgendamento.profissional.fotoPerfil || "/default-doctor.png"}
+                alt="Médico"
+                className="w-14 h-14 rounded-full object-cover border"
+              />
+              <div>
+                <p className="font-medium text-[var(--ink)]">
+                  {proximoAgendamento.profissional.usuario.nome}
                 </p>
-                <p className="text-gray-700 text-sm mb-2 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-gray-400" />
-                  {new Date(a.data).toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                <p className="text-sm text-[var(--text-muted)]">
+                  {proximoAgendamento.profissional.especialidade?.nome}
                 </p>
-
-                <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
-                  <Mail className="w-4 h-4" />
-                  {a.profissional.usuario.email}
-                </div>
-
-                <span
-                  className={`inline-block px-3 py-1 text-xs font-semibold rounded-full mb-3 ${
-                    a.status === 'CONFIRMADO'
-                      ? 'bg-green-100 text-green-700'
-                      : a.status === 'CANCELADO'
-                      ? 'bg-red-100 text-red-700'
-                      : 'bg-yellow-100 text-yellow-700'
-                  }`}
-                >
-                  {a.status}
-                </span>
-
-                {a.status !== 'CANCELADO' && (
-                  <button
-                    onClick={() => handleCancelar(a.id)}
-                    className="flex items-center gap-1 bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition"
-                  >
-                    <XCircle className="w-4 h-4" /> Cancelar
-                  </button>
-                )}
+                <p className="flex items-center text-sm text-[var(--text-muted)] gap-1 mt-1">
+                  <Clock className="w-4 h-4" /> {new Date(proximoAgendamento.data).toLocaleString("pt-BR")}
+                </p>
               </div>
-            ))}
-          </div>
+            </div>
+          </section>
         )}
-      </section>
 
-      {/* NOVO AGENDAMENTO */}
-      <section className="bg-white rounded-2xl shadow p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Agendar nova consulta
-        </h2>
+        <section>
+          <h2 className="text-xl font-semibold text-[var(--ink)] mb-4 flex items-center gap-2">
+            <ClipboardList className="w-5 h-5 text-[var(--sand-600)]" /> Meus Agendamentos
+          </h2>
 
-        <form
-          onSubmit={handleAgendar}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-        >
-          <select
-            value={especialidadeId}
-            onChange={(e) => setEspecialidadeId(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          >
-            <option value="">Especialidade</option>
-            {especialidades.map((esp) => (
-              <option key={esp.id} value={String(esp.id)}>
-                {esp.nome}
-              </option>
-            ))}
-          </select>
+          {agendamentos.length === 0 ? (
+            <div className="text-[var(--text-muted)] text-center py-10 bg-white/90 rounded-xl shadow-sm border border-white/40 backdrop-blur-sm">
+              <Stethoscope className="mx-auto w-10 h-10 text-[var(--sand-300)] mb-3" />
+              <p>Você ainda não possui consultas marcadas.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {agendamentos.map((a) => (
+                <div
+                  key={a.id}
+                  className="bg-white/90 rounded-xl shadow-sm border border-white/40 p-5 hover:shadow-md transition backdrop-blur-sm"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <img
+                      src={a.profissional.fotoPerfil || "/default-doctor.png"}
+                      alt="Médico"
+                      className="w-14 h-14 rounded-full object-cover border"
+                    />
+                    <div>
+                      <p className="font-semibold text-[var(--ink)]">{a.profissional.usuario.nome}</p>
+                      <p className="text-sm text-[var(--text-muted)]">
+                        {a.profissional.especialidade?.nome}
+                      </p>
+                    </div>
+                  </div>
 
-          <select
-            value={profissionalId}
-            onChange={(e) => setProfissionalId(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          >
-            <option value="">Profissional</option>
-            {profissionais.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.usuario.nome} — {p.especialidade?.nome}
-              </option>
-            ))}
-          </select>
+                  <p className="text-[var(--text-muted)] text-sm flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-[var(--sand-300)]" />
+                    {new Date(a.data).toLocaleDateString("pt-BR")}
+                  </p>
+                  <p className="text-[var(--text-muted)] text-sm mb-2 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[var(--sand-300)]" />
+                    {new Date(a.data).toLocaleTimeString("pt-BR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
 
-          <input
-            type="date"
-            value={data}
-            onChange={(e) => setData(e.target.value)}
-            min={dataMinima}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          />
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-3">
+                    <Mail className="w-4 h-4" />
+                    {a.profissional.usuario.email}
+                  </div>
 
-          <select
-            value={hora}
-            onChange={(e) => setHora(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            disabled={carregandoHorarios || !horariosDisponiveis.length}
-            required
-          >
-            <option value="">
-              {carregandoHorarios ? 'Carregando...' : 'Horário'}
-            </option>
-            {horariosDisponiveis.map((h) => (
-              <option key={h} value={h}>
-                {h}
-              </option>
-            ))}
-          </select>
+                  <span
+                    className={`inline-block px-3 py-1 text-xs font-semibold rounded-full mb-3 ${
+                      a.status === "CONFIRMADO"
+                        ? "bg-[var(--sage-100)] text-[var(--sand-600)]"
+                        : a.status === "CANCELADO"
+                        ? "bg-[#f8dcd6] text-[#a45a52]"
+                        : "bg-[var(--sand-200)] text-[var(--sand-600)]"
+                    }`}
+                  >
+                    {a.status}
+                  </span>
 
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition md:col-span-2 lg:col-span-1"
-          >
-            Agendar
-          </button>
-        </form>
-      </section>
-    </div>
+                  {a.status !== "CANCELADO" && (
+                    <button
+                      onClick={() => handleCancelar(a.id)}
+                      className="flex items-center gap-1 bg-[var(--sand-500)] text-white px-3 py-1 rounded text-sm hover:bg-[var(--sand-600)] transition"
+                    >
+                      <XCircle className="w-4 h-4" /> Cancelar
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="bg-white/90 rounded-2xl shadow p-6 border border-white/40 backdrop-blur-sm">
+          <h2 className="text-xl font-semibold text-[var(--ink)] mb-4">Agendar nova consulta</h2>
+
+          <form onSubmit={handleAgendar} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <select
+              value={especialidadeId}
+              onChange={(e) => setEspecialidadeId(e.target.value)}
+              className="border border-[var(--sand-300)] rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--sand-400)]"
+              required
+            >
+              <option value="">Especialidade</option>
+              {especialidades.map((esp) => (
+                <option key={esp.id} value={String(esp.id)}>
+                  {esp.nome}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={profissionalId}
+              onChange={(e) => setProfissionalId(e.target.value)}
+              className="border border-[var(--sand-300)] rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--sand-400)]"
+              required
+            >
+              <option value="">Profissional</option>
+              {profissionais.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.usuario.nome} — {p.especialidade?.nome}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="date"
+              value={data}
+              onChange={(e) => setData(e.target.value)}
+              min={dataMinima}
+              className="border border-[var(--sand-300)] rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--sand-400)]"
+              required
+            />
+
+            <select
+              value={hora}
+              onChange={(e) => setHora(e.target.value)}
+              className="border border-[var(--sand-300)] rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--sand-400)]"
+              disabled={carregandoHorarios || !horariosDisponiveis.length}
+              required
+            >
+              <option value="">{carregandoHorarios ? "Carregando..." : "Horário"}</option>
+              {horariosDisponiveis.map((h) => (
+                <option key={h} value={h}>
+                  {h}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="submit"
+              className="bg-gradient-to-r from-[var(--sand-300)] to-[var(--sand-500)] text-white px-6 py-2 rounded-lg hover:from-[var(--sand-400)] hover:to-[var(--sand-600)] transition md:col-span-2 lg:col-span-1"
+            >
+              Agendar
+            </button>
+          </form>
+        </section>
+      </div>
+    </GlassPage>
   );
 }

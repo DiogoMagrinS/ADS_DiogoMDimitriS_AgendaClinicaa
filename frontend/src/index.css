@@ -1,3 +1,91 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --sand-50: #f9f4ee;
+  --sand-100: #f3ede4;
+  --sand-200: #e5d9c9;
+  --sand-300: #d4c1a7;
+  --sand-400: #c0a789;
+  --sand-500: #a47e5d;
+  --sand-600: #7a5e49;
+  --sand-700: #5a4535;
+  --clay-100: #fbeee8;
+  --clay-200: #f4dbcf;
+  --sage-100: #f1f4ed;
+  --sage-300: #cfd8c0;
+  --ink: #4a3b2d;
+  --text-muted: #6c5a4c;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color: var(--ink);
+  background-color: var(--sand-50);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--sand-50);
+  color: var(--ink);
+}
+
+.background-image {
+  background-image: url("https://vendasds.com/wp-content/uploads/2025/11/fundo.webp");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+.fade-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.4) 20%,
+    rgba(255, 255, 255, 0.6) 40%,
+    rgba(255, 255, 255, 0.8) 60%,
+    #ffffff 80%,
+    #ffffff 100%
+  );
+}
+
+.page-shell {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: clamp(2rem, 3vw, 4rem) clamp(1rem, 4vw, 5rem);
+  overflow: hidden;
+}
+
+.page-shell--top {
+  align-items: flex-start;
+}
+
+.page-shell--center {
+  align-items: center;
+}
+
+.page-shell__content {
+  position: relative;
+  width: 100%;
+  z-index: 10;
+}
+
+.glass-card {
+  background-color: rgba(253, 250, 246, 0.95);
+  backdrop-filter: blur(18px);
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 25px 70px rgba(36, 28, 20, 0.08);
+}
+
+.glass-content {
+  width: 100%;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  color: var(--ink);
+}

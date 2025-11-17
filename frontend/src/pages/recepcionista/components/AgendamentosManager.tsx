@@ -98,16 +98,16 @@ export default function AgendamentosManager() {
 
   if (loading)
     return (
-      <div className="p-8 text-center text-gray-500 animate-pulse">
+      <div className="p-8 text-center text-[var(--text-muted)] animate-pulse">
         Carregando agendamentos...
       </div>
     );
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-          <Calendar className="w-6 h-6 text-blue-600" /> Agendamentos por Profissional
+    <div className="p-8 bg-transparent">
+      <div className="max-w-7xl mx-auto text-[var(--ink)]">
+        <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+          <Calendar className="w-6 h-6 text-[var(--sand-600)]" /> Agendamentos por Profissional
         </h1>
 
         {/* 🔹 Filtros */}
@@ -115,7 +115,7 @@ export default function AgendamentosManager() {
           <input
             type="text"
             placeholder="Buscar por paciente ou profissional..."
-            className="w-full sm:w-1/2 p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:w-1/2 p-2 border border-[var(--sand-300)] rounded-lg shadow-sm focus:ring-2 focus:ring-[var(--sand-400)] bg-white/90"
             value={filtro}
             onChange={(e) => setFiltro(e.target.value)}
           />
@@ -127,7 +127,7 @@ export default function AgendamentosManager() {
                 e.target.value as "TODOS" | "AGENDADO" | "CONFIRMADO" | "CANCELADO"
               )
             }
-            className="w-full sm:w-48 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full sm:w-48 p-2 border border-[var(--sand-300)] rounded-lg focus:ring-2 focus:ring-[var(--sand-400)] bg-white/90"
           >
             <option value="TODOS">Todos</option>
             <option value="AGENDADO">Agendados</option>
@@ -138,13 +138,13 @@ export default function AgendamentosManager() {
 
         {/* 🔹 Agrupamento */}
         {profissionaisOrdenados.length === 0 ? (
-          <div className="text-center text-gray-500 mt-10">
+          <div className="text-center text-[var(--text-muted)] mt-10">
             Nenhum agendamento encontrado.
           </div>
         ) : (
           profissionaisOrdenados.map((prof) => (
             <div key={prof.id} className="mb-10">
-              <div className="flex items-center gap-4 mb-4 border-b pb-2">
+              <div className="flex items-center gap-4 mb-4 border-b border-[var(--sand-200)] pb-2">
                 <img
                   src={
                     prof.fotoPerfil && prof.fotoPerfil.trim() !== ""
@@ -155,10 +155,10 @@ export default function AgendamentosManager() {
                   className="w-12 h-12 rounded-full border"
                 />
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">
+                  <h2 className="text-lg font-semibold">
                     {prof.usuario.nome}
                   </h2>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-[var(--text-muted)]">
                     {prof.especialidade?.nome ?? "Sem especialidade"}
                   </p>
                 </div>
@@ -176,34 +176,34 @@ export default function AgendamentosManager() {
                   return (
                     <motion.div
                       key={a.id}
-                      className="bg-white border border-gray-100 rounded-xl p-5 shadow hover:shadow-lg transition"
+                      className="bg-white/90 border border-white/40 rounded-xl p-5 shadow hover:shadow-lg transition backdrop-blur-sm"
                       whileHover={{ scale: 1.02 }}
                     >
                       <div className="flex justify-between items-center mb-3">
-                        <p className="font-semibold text-gray-800 flex items-center gap-2">
-                          <User className="w-4 h-4 text-blue-500" />
+                        <p className="font-semibold flex items-center gap-2">
+                          <User className="w-4 h-4 text-[var(--sand-600)]" />
                           {a.paciente?.nome ?? "Paciente não informado"}
                         </p>
                         <span
                           className={`px-3 py-1 text-xs font-medium rounded-full ${
                             a.status === "AGENDADO"
-                              ? "bg-yellow-100 text-yellow-700"
+                              ? "bg-[var(--sand-200)] text-[var(--sand-700)]"
                               : a.status === "CONFIRMADO"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
+                              ? "bg-[var(--sage-100)] text-[var(--sand-600)]"
+                              : "bg-[#f8dcd6] text-[#a45a52]"
                           }`}
                         >
                           {a.status}
                         </span>
                       </div>
 
-                      <p className="text-xs text-gray-500 ml-5 mb-2">
+                      <p className="text-xs text-[var(--text-muted)] ml-5 mb-2">
                         {a.paciente?.email ?? "—"}
                       </p>
 
-                      <div className="text-sm text-gray-700 flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-gray-500" /> {dataFormatada}
-                        <Clock className="w-4 h-4 text-gray-500 ml-2" /> {horaFormatada}
+                      <div className="text-sm text-[var(--text-muted)] flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-[var(--sand-300)]" /> {dataFormatada}
+                        <Clock className="w-4 h-4 text-[var(--sand-300)] ml-2" /> {horaFormatada}
                       </div>
 
                       {/* 🔹 Ações */}
@@ -213,13 +213,13 @@ export default function AgendamentosManager() {
                             <>
                               <button
                                 onClick={() => atualizarStatus(a.id, "CONFIRMADO")}
-                                className="flex items-center gap-1 bg-green-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-green-700"
+                                className="flex items-center gap-1 bg-[var(--sage-300)] text-[var(--sand-700)] px-3 py-2 rounded-lg text-sm hover:bg-[var(--sage-100)]"
                               >
                                 <CheckCircle className="w-4 h-4" /> Confirmar
                               </button>
                               <button
                                 onClick={() => atualizarStatus(a.id, "CANCELADO")}
-                                className="flex items-center gap-1 bg-red-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-red-700"
+                                className="flex items-center gap-1 bg-[#e0a39b] text-[#5d2b26] px-3 py-2 rounded-lg text-sm hover:bg-[#d48f86]"
                               >
                                 <XCircle className="w-4 h-4" /> Cancelar
                               </button>

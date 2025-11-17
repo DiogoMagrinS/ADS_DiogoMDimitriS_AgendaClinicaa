@@ -218,25 +218,33 @@ export default function UsuariosManager() {
   }
 
   return (
-    <div className="p-6 bg-white rounded-xl shadow space-y-6">
-      <h2 className="text-2xl font-semibold text-gray-800">Gerenciar Usuários</h2>
+    <div className="p-6 bg-white/90 border border-white/40 rounded-xl shadow space-y-6 backdrop-blur-sm text-[var(--ink)]">
+      <h2 className="text-2xl font-semibold">Gerenciar Usuários</h2>
 
       {/* Formulário de cadastro */}
-      <form onSubmit={handleCadastrarUsuario} className="bg-gray-50 border border-gray-100 p-6 rounded-lg space-y-6">
+      <form onSubmit={handleCadastrarUsuario} className="bg-white border border-white/40 p-6 rounded-lg space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de usuário</label>
+          <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">Tipo de usuário</label>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setNovoUsuario({ ...novoUsuario, tipo: "PACIENTE" })}
-              className={`px-3 py-2 rounded-lg ${novoUsuario.tipo === "PACIENTE" ? "bg-blue-600 text-white" : "bg-white border"}`}
+              className={`px-3 py-2 rounded-lg border ${
+                novoUsuario.tipo === "PACIENTE"
+                  ? "bg-[var(--sand-500)] text-white border-[var(--sand-500)]"
+                  : "bg-white/80 border-[var(--sand-200)] text-[var(--text-muted)]"
+              }`}
             >
               Paciente
             </button>
             <button
               type="button"
               onClick={() => setNovoUsuario({ ...novoUsuario, tipo: "PROFISSIONAL" })}
-              className={`px-3 py-2 rounded-lg ${novoUsuario.tipo === "PROFISSIONAL" ? "bg-blue-600 text-white" : "bg-white border"}`}
+              className={`px-3 py-2 rounded-lg border ${
+                novoUsuario.tipo === "PROFISSIONAL"
+                  ? "bg-[var(--sand-500)] text-white border-[var(--sand-500)]"
+                  : "bg-white/80 border-[var(--sand-200)] text-[var(--text-muted)]"
+              }`}
             >
               Profissional
             </button>
@@ -245,11 +253,11 @@ export default function UsuariosManager() {
 
         {novoUsuario.tipo === "PROFISSIONAL" && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Especialidade</label>
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Especialidade</label>
             <select
               value={novoUsuario.especialidadeId}
               onChange={(e) => setNovoUsuario({ ...novoUsuario, especialidadeId: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-[var(--sand-300)] rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--sand-400)] bg-white/90"
               required
             >
               <option value="">Selecione a especialidade</option>
@@ -264,34 +272,34 @@ export default function UsuariosManager() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Nome</label>
             <input
               type="text"
               value={novoUsuario.nome}
               onChange={(e) => setNovoUsuario({ ...novoUsuario, nome: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              className="w-full border border-[var(--sand-300)] rounded-lg px-3 py-2 bg-white/90 focus:ring-2 focus:ring-[var(--sand-400)]"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">E-mail</label>
             <input
               type="email"
               value={novoUsuario.email}
               onChange={(e) => setNovoUsuario({ ...novoUsuario, email: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              className="w-full border border-[var(--sand-300)] rounded-lg px-3 py-2 bg-white/90 focus:ring-2 focus:ring-[var(--sand-400)]"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+            <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Senha</label>
             <input
               type="password"
               value={novoUsuario.senha}
               onChange={(e) => setNovoUsuario({ ...novoUsuario, senha: e.target.value })}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              className="w-full border border-[var(--sand-300)] rounded-lg px-3 py-2 bg-white/90 focus:ring-2 focus:ring-[var(--sand-400)]"
               required
             />
           </div>
@@ -301,30 +309,30 @@ export default function UsuariosManager() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Hora início</label>
+                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Hora início</label>
                 <input
                   type="time"
                   value={novoUsuario.horaInicio}
                   onChange={(e) => setNovoUsuario({ ...novoUsuario, horaInicio: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="w-full border border-[var(--sand-300)] rounded-lg px-3 py-2 bg-white/90 focus:ring-2 focus:ring-[var(--sand-400)]"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Hora fim</label>
+                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Hora fim</label>
                 <input
                   type="time"
                   value={novoUsuario.horaFim}
                   onChange={(e) => setNovoUsuario({ ...novoUsuario, horaFim: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="w-full border border-[var(--sand-300)] rounded-lg px-3 py-2 bg-white/90 focus:ring-2 focus:ring-[var(--sand-400)]"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Dias de atendimento</label>
+              <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Dias de atendimento</label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {["SEGUNDA", "TERCA", "QUARTA", "QUINTA", "SEXTA", "SABADO", "DOMINGO"].map((dia) => (
                   <label key={dia} className="flex items-center gap-2 text-sm">
@@ -341,34 +349,34 @@ export default function UsuariosManager() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Formação</label>
+                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Formação</label>
                 <input
                   type="text"
                   value={novoUsuario.formacao}
                   onChange={(e) => setNovoUsuario({ ...novoUsuario, formacao: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="w-full border border-[var(--sand-300)] rounded-lg px-3 py-2 bg-white/90 focus:ring-2 focus:ring-[var(--sand-400)]"
                   placeholder="Ex: Medicina - UFRGS"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Foto (URL)</label>
+                <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Foto (URL)</label>
                 <input
                   type="text"
                   value={novoUsuario.fotoPerfil}
                   onChange={(e) => setNovoUsuario({ ...novoUsuario, fotoPerfil: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  className="w-full border border-[var(--sand-300)] rounded-lg px-3 py-2 bg-white/90 focus:ring-2 focus:ring-[var(--sand-400)]"
                   placeholder="https://..."
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Biografia</label>
+              <label className="block text-sm font-medium text-[var(--text-muted)] mb-1">Biografia</label>
               <textarea
                 value={novoUsuario.biografia}
                 onChange={(e) => setNovoUsuario({ ...novoUsuario, biografia: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 min-h-[100px]"
+                className="w-full border border-[var(--sand-300)] rounded-lg px-3 py-2 min-h-[100px] bg-white/90 focus:ring-2 focus:ring-[var(--sand-400)]"
               />
             </div>
           </>
@@ -378,7 +386,7 @@ export default function UsuariosManager() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="bg-gradient-to-r from-[var(--sand-300)] to-[var(--sand-500)] text-white px-4 py-2 rounded-lg hover:from-[var(--sand-400)] hover:to-[var(--sand-600)] disabled:opacity-50"
           >
             {loading ? "Processando..." : "Cadastrar"}
           </button>
@@ -392,20 +400,20 @@ export default function UsuariosManager() {
           placeholder="Pesquisar por nome ou e-mail..."
           value={pesquisa}
           onChange={(e) => setPesquisa(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 mb-4"
+          className="w-full border border-[var(--sand-300)] rounded-lg px-3 py-2 focus:ring-2 focus:ring-[var(--sand-400)] mb-4 bg-white/90"
         />
       </div>
 
       {/* Lista de usuários */}
       <div>
-        <h3 className="text-lg font-medium text-gray-700 mt-6 mb-4">Usuários cadastrados</h3>
+        <h3 className="text-lg font-medium text-[var(--ink)] mt-6 mb-4">Usuários cadastrados</h3>
 
         {usuariosFiltrados.length === 0 ? (
-          <p className="text-gray-600">Nenhum usuário encontrado.</p>
+          <p className="text-[var(--text-muted)]">Nenhum usuário encontrado.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {usuariosFiltrados.map((u) => (
-              <div key={u.id} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex gap-4 items-center">
+              <div key={u.id} className="bg-white/90 border border-white/40 rounded-xl p-4 shadow-sm flex gap-4 items-center backdrop-blur-sm">
                 <img
                   src={u.profissional?.fotoPerfil && u.profissional.fotoPerfil.trim() !== "" ? u.profissional.fotoPerfil : `https://i.pravatar.cc/100?u=${u.id}`}
                   alt={u.nome}
@@ -414,25 +422,25 @@ export default function UsuariosManager() {
                 <div className="flex-1">
                   <div className="flex justify-between items-start gap-2">
                     <div>
-                      <p className="font-semibold text-gray-900">{u.nome}</p>
-                      <p className="text-sm text-gray-600">{u.email}</p>
-                      <p className="text-xs text-gray-500 mt-1">{u.tipo}</p>
+                      <p className="font-semibold text-[var(--ink)]">{u.nome}</p>
+                      <p className="text-sm text-[var(--text-muted)]">{u.email}</p>
+                      <p className="text-xs text-[var(--text-muted)] mt-1">{u.tipo}</p>
                       {u.profissional?.especialidade?.nome && (
-                        <p className="text-sm text-blue-600 mt-1">{u.profissional.especialidade.nome}</p>
+                        <p className="text-sm text-[var(--sand-600)] mt-1">{u.profissional.especialidade.nome}</p>
                       )}
                     </div>
 
                     <div className="flex flex-col items-end gap-2">
                       <button
                         onClick={() => abrirModalFoto(u)}
-                        className="text-sm text-blue-600 hover:underline"
+                        className="text-sm text-[var(--sand-600)] hover:underline"
                       >
                         Editar Foto
                       </button>
 
                       <button
                         onClick={() => handleExcluirUsuario(u.id)}
-                        className="text-sm text-red-600 hover:underline"
+                        className="text-sm text-[#a45a52] hover:underline"
                       >
                         Excluir
                       </button>
@@ -448,15 +456,15 @@ export default function UsuariosManager() {
       {/* Modal editar foto */}
       {modalFotoAberto && usuarioSelecionado && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <h4 className="text-lg font-semibold mb-4">Editar foto de {usuarioSelecionado.nome}</h4>
+          <div className="bg-white/95 rounded-xl p-6 w-full max-w-md border border-white/40 backdrop-blur-lg">
+            <h4 className="text-lg font-semibold mb-4 text-[var(--ink)]">Editar foto de {usuarioSelecionado.nome}</h4>
 
-            <label className="block text-sm text-gray-700 mb-2">Nova URL da foto</label>
+            <label className="block text-sm text-[var(--text-muted)] mb-2">Nova URL da foto</label>
             <input
               type="text"
               value={novaFotoUrl}
               onChange={(e) => setNovaFotoUrl(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4"
+              className="w-full border border-[var(--sand-300)] rounded-lg px-3 py-2 mb-4 bg-white/90 focus:ring-2 focus:ring-[var(--sand-400)]"
               placeholder="https://..."
             />
 
@@ -467,13 +475,17 @@ export default function UsuariosManager() {
                 className="w-24 h-24 object-cover rounded-full border"
               />
               <div>
-                <p className="text-sm text-gray-600">Pré-visualização</p>
+                <p className="text-sm text-[var(--text-muted)]">Pré-visualização</p>
               </div>
             </div>
 
             <div className="flex justify-end gap-3">
-              <button onClick={fecharModalFoto} className="px-4 py-2 rounded-lg border">Cancelar</button>
-              <button onClick={salvarFoto} className="px-4 py-2 rounded-lg bg-blue-600 text-white">Salvar</button>
+              <button onClick={fecharModalFoto} className="px-4 py-2 rounded-lg border border-[var(--sand-300)] text-[var(--text-muted)]">
+                Cancelar
+              </button>
+              <button onClick={salvarFoto} className="px-4 py-2 rounded-lg bg-[var(--sand-500)] text-white hover:bg-[var(--sand-600)]">
+                Salvar
+              </button>
             </div>
           </div>
         </div>
