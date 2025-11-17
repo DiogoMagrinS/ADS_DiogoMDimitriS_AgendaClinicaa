@@ -9,6 +9,7 @@ import authRoutes from './routes/authRoutes';
 import profissionalRoutes from './routes/profissionalRoutes';
 import agendamentoRoutes from './routes/agendamentoRoutes';
 import recepcionistaRoutes from "./routes/recepcionistaRoutes";
+import notificacaoRoutes from './routes/notificacaoRoutes';
 
 dotenv.config(); // Carrega variáveis do .env
 
@@ -26,6 +27,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profissionais', profissionalRoutes);  
 app.use('/api/agendamentos', agendamentoRoutes);           
 app.use("/api/recepcionista", recepcionistaRoutes);
+app.use('/api/notificacoes', notificacaoRoutes);
 
 // Healthcheck
 app.get('/healthcheck', (req, res) => {

@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, StatusAgendamento } from '@prisma/client';
+import { enviarNotificacao } from './notificacaoService';
 
 const prisma = new PrismaClient();
 
@@ -57,7 +58,7 @@ export async function criarAgendamento(data: {
 
   if (conflito) throw new Error('Horário já agendado');
 
-  return prisma.agendamento.create({
+  const agendamento = await prisma.agendamento.create({
     data: {
       pacienteId: data.pacienteId,
       profissionalId: data.profissionalId,
@@ -65,6 +66,46 @@ export async function criarAgendamento(data: {
       observacoes: data.observacoes
     }
   });
+
+  const paciente = await prisma.usuario.findUnique({ where: { id: data.pacienteId } });
+  const profissionalUsuario = await prisma.profissional.findUnique({
+    where: { id: data.profissionalId },
+    include: { usuario: true },
+  });
+
+  if (paciente) {
+    await enviarNotificacao({
+      tipo: 'EDICAO',
+      canal: 'WHATSAPP',
+      destinatario: {
+        idUsuario: paciente.id,
+        tipoUsuario: paciente.tipo,
+        nome: paciente.nome,
+        telefone: paciente.telefone,
+      },
+      conteudo: `Seu agendamento foi criado para ${dataAgendamento.toLocaleString('pt-BR')}.`,
+      meta: { agendamentoId: agendamento.id },
+      agendamentoId: agendamento.id,
+    });
+  }
+
+  if (profissionalUsuario?.usuario) {
+    await enviarNotificacao({
+      tipo: 'EDICAO',
+      canal: 'WHATSAPP',
+      destinatario: {
+        idUsuario: profissionalUsuario.usuario.id,
+        tipoUsuario: profissionalUsuario.usuario.tipo,
+        nome: profissionalUsuario.usuario.nome,
+        telefone: profissionalUsuario.usuario.telefone,
+      },
+      conteudo: `Novo agendamento marcado para ${dataAgendamento.toLocaleString('pt-BR')}.`,
+      meta: { agendamentoId: agendamento.id },
+      agendamentoId: agendamento.id,
+    });
+  }
+
+  return agendamento;
 }
 
 export async function atualizarAgendamento(
@@ -77,7 +118,11 @@ export async function atualizarAgendamento(
   }>
 ) {
   const agendamentoExistente = await prisma.agendamento.findUnique({
-    where: { id }
+    where: { id },
+    include: {
+      paciente: true,
+      profissional: { include: { usuario: true } },
+    }
   });
 
   if (!agendamentoExistente) throw new Error('Agendamento não encontrado');
@@ -106,6 +151,8 @@ export async function atualizarAgendamento(
   const statusAlterado = dados.status && dados.status !== agendamentoExistente.status;
 
   // Atualiza o agendamento
+  const dataAnterior = agendamentoExistente.data;
+
   const atualizado = await prisma.agendamento.update({
     where: { id },
     data: {
@@ -124,6 +171,66 @@ export async function atualizarAgendamento(
         status: dados.status as any
       }
     });
+  }
+
+  const paciente = agendamentoExistente.paciente;
+  const profissionalUsuario = agendamentoExistente.profissional.usuario;
+
+  const dataMudou =
+    dataAtualizada && dataAtualizada.getTime() !== new Date(dataAnterior).getTime();
+
+  if (dataMudou) {
+    const resumo = `Nova data/horário: ${dataAtualizada?.toLocaleString('pt-BR')}`;
+
+    if (paciente) {
+      await enviarNotificacao({
+        tipo: 'EDICAO',
+        canal: 'WHATSAPP',
+        destinatario: {
+          idUsuario: paciente.id,
+          tipoUsuario: paciente.tipo,
+          nome: paciente.nome,
+          telefone: paciente.telefone,
+        },
+        conteudo: `Seu agendamento foi atualizado. ${resumo}`,
+        meta: { agendamentoId: atualizado.id },
+        agendamentoId: atualizado.id,
+      });
+    }
+
+    if (profissionalUsuario) {
+      await enviarNotificacao({
+        tipo: 'EDICAO',
+        canal: 'WHATSAPP',
+        destinatario: {
+          idUsuario: profissionalUsuario.id,
+          tipoUsuario: profissionalUsuario.tipo,
+          nome: profissionalUsuario.nome,
+          telefone: profissionalUsuario.telefone,
+        },
+        conteudo: `Um agendamento da sua agenda foi atualizado. ${resumo}`,
+        meta: { agendamentoId: atualizado.id },
+        agendamentoId: atualizado.id,
+      });
+    }
+  }
+
+  if (dados.status && dados.status === StatusAgendamento.CANCELADO) {
+    if (profissionalUsuario) {
+      await enviarNotificacao({
+        tipo: 'CANCELAMENTO',
+        canal: 'WHATSAPP',
+        destinatario: {
+          idUsuario: profissionalUsuario.id,
+          tipoUsuario: profissionalUsuario.tipo,
+          nome: profissionalUsuario.nome,
+          telefone: profissionalUsuario.telefone,
+        },
+        conteudo: `Um agendamento foi cancelado (${agendamentoExistente.data.toLocaleString('pt-BR')}).`,
+        meta: { agendamentoId: atualizado.id },
+        agendamentoId: atualizado.id,
+      });
+    }
   }
 
   return atualizado;
