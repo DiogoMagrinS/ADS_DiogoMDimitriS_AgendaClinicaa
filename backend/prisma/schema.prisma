@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id               Int           @id @default(autoincrement())
+  nome             String
+  email            String        @unique
+  senha            String
+  tipo             TipoUsuario
+  criadoEm         DateTime      @default(now())
+  telefone         String?
+  agendamentos     Agendamento[] @relation("PacienteAgendamentos")
+  avaliacoesFeitas Avaliacao[]
+  notificacoes     Notificacao[]
+  profissional     Profissional?
+}
+
+model Profissional {
+  id              Int           @id @default(autoincrement())
+  usuarioId       Int           @unique
+  especialidadeId Int
+  diasAtendimento DiaSemana[]
+  horaInicio      String
+  horaFim         String
+  biografia       String?
+  formacao        String?
+  fotoPerfil      String?
+  agendamentos    Agendamento[] @relation("ProfissionalAgendamentos")
+  avaliacoes      Avaliacao[]
+  especialidade   Especialidade @relation(fields: [especialidadeId], references: [id])
+  usuario         Usuario       @relation(fields: [usuarioId], references: [id])
+}
+
+model Agendamento {
+  id              Int               @id @default(autoincrement())
+  pacienteId      Int
+  profissionalId  Int
+  data            DateTime
+  status          StatusAgendamento @default(AGENDADO)
+  criadoEm        DateTime          @default(now())
+  observacoes     String?
+  paciente        Usuario           @relation("PacienteAgendamentos", fields: [pacienteId], references: [id])
+  profissional    Profissional      @relation("ProfissionalAgendamentos", fields: [profissionalId], references: [id])
+  avaliacoes      Avaliacao?
+  historicoStatus HistoricoStatus[]
+  notificacoes    Notificacao[]
+}
+
+model HistoricoStatus {
+  id            Int               @id @default(autoincrement())
+  agendamentoId Int
+  status        StatusAgendamento
+  dataHora      DateTime          @default(now())
+  agendamento   Agendamento       @relation(fields: [agendamentoId], references: [id])
+}
+
+model Especialidade {
+  id            Int            @id @default(autoincrement())
+  nome          String         @unique
+  profissionais Profissional[]
+}
+
+model Avaliacao {
+  id             Int          @id @default(autoincrement())
+  agendamentoId  Int          @unique
+  profissionalId Int
+  pacienteId     Int
+  nota           Int
+  comentario     String?
+  criadoEm       DateTime     @default(now())
+  agendamento    Agendamento  @relation(fields: [agendamentoId], references: [id])
+  paciente       Usuario      @relation(fields: [pacienteId], references: [id])
+  profissional   Profissional @relation(fields: [profissionalId], references: [id])
+}
+
+model Notificacao {
+  id               Int               @id @default(autoincrement())
+  tipo             TipoNotificacao
+  canal            CanalNotificacao
+  destinatarioId   Int
+  destinatarioTipo TipoUsuario
+  conteudo         String
+  meta             Json              @default("{}")
+  status           StatusNotificacao
+  detalhesErro     String?
+  criadoEm         DateTime          @default(now())
+  agendamentoId    Int?
+  agendamento      Agendamento?      @relation(fields: [agendamentoId], references: [id])
+  destinatario     Usuario           @relation(fields: [destinatarioId], references: [id])
+
+  @@index([destinatarioId])
+  @@index([agendamentoId])
+  @@index([status])
+}
+
+enum TipoUsuario {
+  PACIENTE
+  PROFISSIONAL
+  RECEPCIONISTA
+}
+
+enum StatusAgendamento {
+  AGENDADO
+  CONFIRMADO
+  CANCELADO
+  FINALIZADO
+}
+
+enum DiaSemana {
+  SEGUNDA
+  TERCA
+  QUARTA
+  QUINTA
+  SEXTA
+  SABADO
+  DOMINGO
+}
+
+enum TipoNotificacao {
+  LEMBRETE
+  CANCELAMENTO
+  EDICAO
+  POS_CONSULTA
+  CONFIRMACAO_PRESENCA
+}
+
+enum CanalNotificacao {
+  WHATSAPP
+}
+
+enum StatusNotificacao {
+  CRIADA
+  ENVIADA
+  AGENDADA
+  FALHOU
+}
