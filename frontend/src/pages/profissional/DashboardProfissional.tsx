@@ -9,7 +9,6 @@ import {
   TrendingUp,
   CheckCircle,
   XCircle,
-  User,
   FileText,
   X,
 } from "lucide-react";
@@ -45,6 +44,7 @@ const DashboardProfissional: React.FC = () => {
   const [agendamentoParaFinalizar, setAgendamentoParaFinalizar] = useState<number | null>(null);
   const [anotacoes, setAnotacoes] = useState("");
 
+
   // Buscar agendamentos do profissional
   const fetchAgendamentos = async () => {
     try {
@@ -70,26 +70,9 @@ const DashboardProfissional: React.FC = () => {
 
   const proximos = agendamentos
     .filter(a => new Date(a.data) > new Date() && a.status !== 'CANCELADO' && a.status !== 'FINALIZADO')
+
     .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
     .slice(0, 3);
-
-  const handleMudarStatus = async (id: number, novoStatus: string) => {
-    try {
-      await api.patch(`/agendamentos/${id}/status`, { status: novoStatus });
-      
-      // Se finalizar, remove o agendamento da lista
-      if (novoStatus === "FINALIZADO") {
-        setAgendamentos(prev => prev.filter(a => a.id !== id));
-        toast.success("Agendamento finalizado e removido da lista!");
-      } else {
-        setAgendamentos(prev => prev.map(a => (a.id === id ? { ...a, status: novoStatus } : a)));
-        toast.success("Status atualizado!");
-      }
-    } catch (err) {
-      console.error("Erro ao atualizar status:", err);
-      toast.error("Erro ao atualizar status.");
-    }
-  };
 
   const abrirModalAnotacoes = (id: number) => {
     setAgendamentoParaFinalizar(id);
@@ -210,6 +193,7 @@ const DashboardProfissional: React.FC = () => {
                     <button
                       onClick={() => abrirModalAnotacoes(a.id)}
                       className="flex-1 bg-[var(--sand-500)] text-white text-sm px-3 py-1 rounded-lg transition hover:bg-[var(--sand-600)]"
+
                     >
                       Finalizar
                     </button>
@@ -241,7 +225,6 @@ const DashboardProfissional: React.FC = () => {
           <h2 className="text-lg font-semibold text-[var(--ink)] mb-4 flex items-center gap-2">
             <CalendarDays className="w-5 h-5 text-[var(--sand-600)]" /> Todos os agendamentos
           </h2>
-
           {agendamentos.filter(a => a.status !== 'CANCELADO' && a.status !== 'FINALIZADO').length === 0 ? (
             <p className="text-[var(--text-muted)] text-center">Nenhum agendamento encontrado.</p>
           ) : (
@@ -300,7 +283,6 @@ const DashboardProfissional: React.FC = () => {
                     >
                       Finalizar
                     </button>
-
                     <button
                       onClick={async () => {
                         if (confirm("Deseja realmente excluir este agendamento?")) {
@@ -323,8 +305,7 @@ const DashboardProfissional: React.FC = () => {
               ))}
             </div>
           )}
-        </section>
-
+        </section>    
         {/* Modal de Anotações */}
         {modalAnotacoesAberto && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

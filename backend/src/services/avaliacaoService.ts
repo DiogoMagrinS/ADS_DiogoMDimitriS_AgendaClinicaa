@@ -11,8 +11,7 @@ export async function criarAvaliacao(data: {
 }) {
   // Verifica se o agendamento existe e está finalizado
   const agendamento = await prisma.agendamento.findUnique({
-    where: { id: data.agendamentoId },
-    include: { avaliacoes: true }
+    where: { id: data.agendamentoId }
   });
 
   if (!agendamento) {
@@ -24,7 +23,11 @@ export async function criarAvaliacao(data: {
   }
 
   // Verifica se já existe uma avaliação para este agendamento
-  if (agendamento.avaliacoes.length > 0) {
+  const avaliacaoExistente = await (prisma as any).avaliacao.findUnique({
+    where: { agendamentoId: data.agendamentoId }
+  });
+
+  if (avaliacaoExistente) {
     throw new Error('Este agendamento já foi avaliado');
   }
 
@@ -38,7 +41,7 @@ export async function criarAvaliacao(data: {
     throw new Error('A nota deve ser entre 1 e 5');
   }
 
-  return prisma.avaliacao.create({
+  return (prisma as any).avaliacao.create({
     data: {
       agendamentoId: data.agendamentoId,
       profissionalId: data.profissionalId,
@@ -55,7 +58,7 @@ export async function criarAvaliacao(data: {
 }
 
 export async function listarAvaliacoesDoProfissional(profissionalId: number) {
-  return prisma.avaliacao.findMany({
+  return (prisma as any).avaliacao.findMany({
     where: { profissionalId },
     include: {
       paciente: {
@@ -70,7 +73,7 @@ export async function listarAvaliacoesDoProfissional(profissionalId: number) {
 }
 
 export async function obterEstatisticasAvaliacao(profissionalId: number) {
-  const avaliacoes = await prisma.avaliacao.findMany({
+  const avaliacoes = await (prisma as any).avaliacao.findMany({
     where: { profissionalId },
     select: { nota: true }
   });
@@ -84,10 +87,10 @@ export async function obterEstatisticasAvaliacao(profissionalId: number) {
   }
 
   const total = avaliacoes.length;
-  const soma = avaliacoes.reduce((acc, a) => acc + a.nota, 0);
+  const soma = avaliacoes.reduce((acc: number, a: any) => acc + a.nota, 0);
   const media = soma / total;
 
-  const distribuicao = avaliacoes.reduce((acc, a) => {
+  const distribuicao = avaliacoes.reduce((acc: Record<number, number>, a: any) => {
     acc[a.nota as keyof typeof acc] = (acc[a.nota as keyof typeof acc] || 0) + 1;
     return acc;
   }, { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } as Record<number, number>);
@@ -105,27 +108,31 @@ export async function listarProfissionaisComAvaliacoes() {
       usuario: {
         select: { nome: true, email: true }
       },
-      especialidade: true,
-      avaliacoes: {
-        include: {
-          paciente: {
-            select: { nome: true }
-          }
-        },
-        orderBy: { criadoEm: 'desc' },
-        take: 5 // Últimas 5 avaliações
-      }
+      especialidade: true
     }
   });
 
   // Adiciona estatísticas de avaliação para cada profissional
   const profissionaisComStats = await Promise.all(
-    profissionais.map(async (prof) => {
+    profissionais.map(async (prof: any) => {
       const stats = await obterEstatisticasAvaliacao(prof.id);
+      // Busca avaliações do profissional
+      const avaliacoes = await (prisma as any).avaliacao.findMany({
+        where: { profissionalId: prof.id },
+        include: {
+          paciente: {
+            select: { nome: true }
+          }
+        },
+        orderBy: { criadoEm: 'desc' as any },
+        take: 5
+      });
+      
       return {
         ...prof,
         avaliacaoMedia: stats.media,
-        totalAvaliacoes: stats.total
+        totalAvaliacoes: stats.total,
+        avaliacoes
       };
     })
   );

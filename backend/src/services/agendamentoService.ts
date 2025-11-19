@@ -3,8 +3,11 @@ import { PrismaClient, StatusAgendamento } from '@prisma/client';
 // Função auxiliar para enviar notificação (opcional - não bloqueia o fluxo)
 async function enviarNotificacaoSegura(dados: any) {
   try {
-    const { enviarNotificacao } = await import('./notificacaoService');
-    await enviarNotificacao(dados);
+    // @ts-ignore - Import dinâmico pode não ser resolvido em tempo de compilação
+    const notificacaoModule = await import('./notificacaoService');
+    if (notificacaoModule && notificacaoModule.enviarNotificacao) {
+      await notificacaoModule.enviarNotificacao(dados);
+    }
   } catch (error) {
     // Se o serviço de notificação não existir ou falhar, apenas loga o erro
     // mas não interrompe a criação do agendamento
@@ -289,8 +292,7 @@ export async function listarAgendamentosDoUsuario(usuarioId: number) {
           usuario: true,          // ✅ pega todos os dados do usuário
           especialidade: true     // ✅ pega a especialidade correta vinculada ao profissional
         }
-      },
-      avaliacoes: true            // ✅ inclui as avaliações do agendamento
+      }
     }
   });
 }

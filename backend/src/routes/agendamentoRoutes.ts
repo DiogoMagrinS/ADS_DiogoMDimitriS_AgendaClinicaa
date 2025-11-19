@@ -9,6 +9,7 @@ import {
   listarAgendamentosUsuario,
   listarAgendamentosProfissional,
   editarObservacoes
+
 } from '../controllers/agendamentoController';
 import { autenticarToken } from '../middlewares/authMiddleware';
 
@@ -21,11 +22,13 @@ router.get('/me', listarAgendamentosUsuario);
 router.get('/profissional/me', listarAgendamentosProfissional);
 router.patch('/:id/status', atualizarStatus);
 router.patch('/:id/observacoes', editarObservacoes);
+
 router.get('/', getAgendamentos);
 router.get('/:id', getAgendamentoPorId);
 router.post('/', postAgendamento);
 router.put('/:id', putAgendamento);
 router.delete('/:id', deleteAgendamento);
+
 
 router.get('/me', autenticarToken, listarAgendamentosUsuario);
 router.get('/me/profissional', autenticarToken, listarAgendamentosProfissional);

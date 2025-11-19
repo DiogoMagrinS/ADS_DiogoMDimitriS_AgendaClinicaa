@@ -18,7 +18,6 @@ interface DadosNotificacao {
   meta?: Record<string, any>;
   agendamentoId?: number;
 }
-
 /**
  * Templates de mensagens para diferentes tipos de notificações
  */
@@ -246,4 +245,5 @@ export async function enviarLembretesAgendamentos(): Promise<void> {
     console.error('Erro ao enviar lembretes:', error);
   }
 }
+
 

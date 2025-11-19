@@ -64,7 +64,7 @@ class WhatsAppService {
         }
       );
 
-      const instances = response.data;
+      const instances = response.data as any[];
       return instances.some((inst: any) => inst.instance.instanceName === this.config.instanceName);
     } catch (error) {
       console.error('Erro ao verificar instância:', error);
@@ -93,9 +93,10 @@ class WhatsAppService {
         }
       );
 
+      const responseData = response.data as any;
       return {
         success: true,
-        messageId: response.data.key?.id,
+        messageId: responseData.key?.id,
       };
     } catch (error: any) {
       console.error('Erro ao enviar mensagem WhatsApp:', error.response?.data || error.message);
@@ -138,9 +139,10 @@ class WhatsAppService {
         }
       );
 
+      const responseData = response.data as any;
       return {
         success: true,
-        messageId: response.data.key?.id,
+        messageId: responseData.key?.id,
       };
     } catch (error: any) {
       console.error('Erro ao enviar template WhatsApp:', error.response?.data || error.message);
@@ -178,9 +180,10 @@ class WhatsAppService {
         }
       );
 
+      const responseData = response.data as any;
       return {
         success: true,
-        messageId: response.data.key?.id,
+        messageId: responseData.key?.id,
       };
     } catch (error: any) {
       console.error('Erro ao enviar imagem WhatsApp:', error.response?.data || error.message);

@@ -109,6 +109,7 @@ export default function AgendamentosManager() {
         <Calendar className="w-6 h-6 text-[var(--sand-600)]" /> Agendamentos por Profissional
       </h1>
 
+
         {/* 🔹 Filtros */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <input

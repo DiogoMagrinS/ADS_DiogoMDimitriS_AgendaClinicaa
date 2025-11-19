@@ -164,7 +164,6 @@ export async function listarAgendamentosProfissional(req: Request, res: Response
     return res.status(400).json({ erro: error.message });
   }
 }
-
 // 🔄 Atualizar status do agendamento
 export async function atualizarStatus(req: Request, res: Response) {
   try {
@@ -174,7 +173,6 @@ export async function atualizarStatus(req: Request, res: Response) {
     if (!['CONFIRMADO', 'CANCELADO', 'FINALIZADO'].includes(status)) {
       return res.status(400).json({ erro: 'Status inválido.' });
     }
-
     // Busca o agendamento antes de atualizar para enviar notificações
     const agendamentoAntes = await prisma.agendamento.findUnique({
       where: { id },

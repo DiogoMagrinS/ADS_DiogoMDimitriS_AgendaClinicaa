@@ -94,6 +94,7 @@ export default function DashboardPaciente() {
   const [notaAvaliacao, setNotaAvaliacao] = useState(0);
   const [comentarioAvaliacao, setComentarioAvaliacao] = useState('');
 
+
   const user = getUserFromToken();
   const dataMinima = new Date().toISOString().split('T')[0];
 
@@ -164,6 +165,7 @@ export default function DashboardPaciente() {
 
     try {
       await api.post('/agendamentos', {
+
         pacienteId: user.id,
         profissionalId: Number(profissionalId),
         data: dataHoraSelecionada.toISOString(),
@@ -254,8 +256,8 @@ export default function DashboardPaciente() {
 
       toast.success('Avaliação enviada com sucesso!');
       fecharModalAvaliacao();
-    } catch (error: any) {
-      const mensagemErro = error.response?.data?.erro || 'Erro ao enviar avaliação.';
+    } catch (error: unknown) {
+      const mensagemErro = (error as AxiosError<{ erro: string }>)?.response?.data?.erro || 'Erro ao enviar avaliação.';
       toast.error(mensagemErro);
     }
   };
@@ -291,8 +293,6 @@ export default function DashboardPaciente() {
       );
     }
   ).length;
-
-  // =====================================================
   return (
     <GlassPage
       maxWidthClass="w-full"
@@ -677,7 +677,6 @@ export default function DashboardPaciente() {
             </div>
           )}
         </section>
-
         {/* Modal de Avaliação */}
         {modalAvaliacaoAberto && agendamentoParaAvaliar && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

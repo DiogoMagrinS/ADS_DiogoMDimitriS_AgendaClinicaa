@@ -44,7 +44,6 @@ export default function DashboardRecepcionista() {
             </div>
           </div>
         </header>
-
         <div className="flex items-center flex-wrap gap-3">
           {tabs.map(({ key, label }) => (
             <button
